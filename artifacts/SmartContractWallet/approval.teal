@@ -1,0 +1,138 @@
+#pragma version 8
+intcblock 0 1
+bytecblock 0x 0x6e616d65 0x7468726573686f6c64 0x7472616e73616374696f6e73436f756e74 0x76657273696f6e 0x151f7c75
+txna ApplicationArgs 0
+pushbytes 0x85d874e3 // "create(string,uint64,uint64)string"
+==
+bnz main_l4
+txna ApplicationArgs 0
+pushbytes 0xf65a8e79 // "set_owner(uint64,string)string"
+==
+bnz main_l3
+err
+main_l3:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub setownercaster_4
+intc_1 // 1
+return
+main_l4:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+==
+&&
+assert
+callsub createcaster_3
+intc_1 // 1
+return
+
+// prefix_key_gen
+prefixkeygen_0:
+proto 1 1
+pushbytes 0x6f776e657273 // "owners"
+frame_dig -1
+concat
+retsub
+
+// create
+create_1:
+proto 3 1
+bytec_0 // ""
+bytec_1 // "name"
+bytec_0 // ""
+app_global_put
+bytec_2 // "threshold"
+intc_0 // 0
+app_global_put
+bytec_3 // "transactionsCount"
+intc_0 // 0
+app_global_put
+bytec 4 // "version"
+intc_0 // 0
+app_global_put
+bytec_1 // "name"
+frame_dig -3
+extract 2 0
+app_global_put
+bytec 4 // "version"
+frame_dig -2
+app_global_put
+bytec_2 // "threshold"
+frame_dig -1
+app_global_put
+bytec_3 // "transactionsCount"
+intc_0 // 0
+app_global_put
+pushbytes 0x001e4372656174656420736d61727420636f6e74726163742077616c6c657421 // 0x001e4372656174656420736d61727420636f6e74726163742077616c6c657421
+frame_bury 0
+retsub
+
+// set_owner
+setowner_2:
+proto 2 1
+bytec_0 // ""
+frame_dig -2
+itob
+callsub prefixkeygen_0
+frame_dig -1
+extract 2 0
+app_global_put
+pushbytes 0x000a536574206f776e657221 // 0x000a536574206f776e657221
+frame_bury 0
+retsub
+
+// create_caster
+createcaster_3:
+proto 0 0
+bytec_0 // ""
+dup
+intc_0 // 0
+dup
+txna ApplicationArgs 1
+frame_bury 1
+txna ApplicationArgs 2
+btoi
+frame_bury 2
+txna ApplicationArgs 3
+btoi
+frame_bury 3
+frame_dig 1
+frame_dig 2
+frame_dig 3
+callsub create_1
+frame_bury 0
+bytec 5 // 0x151f7c75
+frame_dig 0
+concat
+log
+retsub
+
+// set_owner_caster
+setownercaster_4:
+proto 0 0
+bytec_0 // ""
+intc_0 // 0
+bytec_0 // ""
+txna ApplicationArgs 1
+btoi
+frame_bury 1
+txna ApplicationArgs 2
+frame_bury 2
+frame_dig 1
+frame_dig 2
+callsub setowner_2
+frame_bury 0
+bytec 5 // 0x151f7c75
+frame_dig 0
+concat
+log
+retsub

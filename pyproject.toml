@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "multisig-assessment"
+version = "0.1.0"
+description = "Multisig Smart Contract Wallet"
+authors = ["Aden Teo <88359484+adenteo@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "multisig_assessment"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+beaker-pyteal = "^1.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

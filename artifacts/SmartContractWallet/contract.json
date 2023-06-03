@@ -1,0 +1,42 @@
+{
+    "name": "SmartContractWallet",
+    "methods": [
+        {
+            "name": "create",
+            "args": [
+                {
+                    "type": "string",
+                    "name": "name"
+                },
+                {
+                    "type": "uint64",
+                    "name": "version"
+                },
+                {
+                    "type": "uint64",
+                    "name": "threshold"
+                }
+            ],
+            "returns": {
+                "type": "string"
+            }
+        },
+        {
+            "name": "set_owner",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "index"
+                },
+                {
+                    "type": "string",
+                    "name": "address"
+                }
+            ],
+            "returns": {
+                "type": "string"
+            }
+        }
+    ],
+    "networks": {}
+}

@@ -1,55 +1,35 @@
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-718a45dd9cf7e7f842a935f5ebbe5719a5e09af4491e668f4dbf3b35d5cca122.svg)](https://classroom.github.com/online_ide?assignment_repo_id=11225796&assignment_repo_type=AssignmentRepo)
-# Multisig Smart Contract Wallet
+Initialise smart contract that will hold algos and assets.
 
-## Overview
-As multisig signing capabilities are not widely implemented on web3 wallets on Algorand, we can potentially create a smart contract wallet (SCW) that implements this funcationlity.
+Functions in smart contract wallet
 
-Create a Dapp that allows end users to manage a multisig SCW that authorizes transactions from it.
+-   can receive algos and assets from owners
 
-## Application Details
+-   Send algos (Opted in function) innerTxn payment type (assert signatures is enough)
+-   Send FTs/NFTs (Opted in function) innerTxn assetTrf type (assert signatures is enough)
+-   Opt in
 
-### Smart Wallet Contract
+Boxes to store txns,
+When threshold signatures is reached, any owner can make the sendAlgos/sendNFTs/sendFTs app call with their signature. Just execute() it.
 
-#### Core Features
+When you make these app calls, you'll pass in parameters from the txn (from box array). The parameters of the txn include:
 
-1. Store Algos and ASAs
-2. Issue Algos and ASAs, subjected to the required number of owners approval
-3. Owners need to opt into this contract to use it
+amount of ALGOS/ASA
+receiver
+number of signatures acquired
 
-#### Required Information
+FRONTEND:
 
-1. Wallet name
-2. Contract version number (e.g. v1.0)
-3. List of owner addresses (max 10)
-4. Required number of signers (min 1, max 10)
+1. User define information about wallet.
 
-#### Pending transactions
+-   wallet name
+-   contract version
+-   list of owners
+-   required no. of signers
 
-1. Allow any SCW owner to create pending transactions to send Algos or Assets from the SCW.
-2. You can use boxes to store pending transactions when sending Algos or Assets from the smart contract wallet. 
-3. You should also track the signing status for each pending transaction. 
-4. Any owner can execute this pending transaction once the number of required signers are met. 
-5. Remove the box once the transaction has been executed to reduce minimum balance requirement (MBR).
+Once click create, initialise global state with name, owners, version, threshhold signature
 
-### Application Frontend
+ALL functions in smart contract will check if sender equal multisig address
 
-These are the required functionalities for the Dapp
+Flow of work
 
-1. Users can create SCW.
-2. Users can load their SCW.
-3. Users to opt into their SCW if necessary.
-4. Users can view a list of pending transactions.
-5. Users can sign pending transactions.
-6. Users can execute pending transactions.
-
-## Testing
-
-Write test cases to demostrate the successful flow and negative tests to demostrate if the necesssary checks are in place.
-
-## Deployment
-
-Include documentation on how to deploy the smart contracts and how to set up the application frontend locally.
-
-## Assesment Criteria
-
-[https://docs.google.com/document/d/1Kpb3Bid3JXKFGh_SwP8iVPpry2T-t8j5BBqLAP87FeE/edit?usp=sharing](https://docs.google.com/document/d/1Kpb3Bid3JXKFGh_SwP8iVPpry2T-t8j5BBqLAP87FeE/edit?usp=sharing)
+1. Write up python file for contract first. Creation function should receive number of owners associated.

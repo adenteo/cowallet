@@ -1,0 +1,48 @@
+{
+  "name": "multisig-adenteo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "browser": {
+    "fs": false,
+    "os": false,
+    "path": false
+  },
+  "dependencies": {
+    "@blockshake/defly-connect": "^1.1.2",
+    "@daffiwallet/connect": "^1.0.3",
+    "@headlessui/react": "^1.7.14",
+    "@json-rpc-tools/utils": "^1.7.6",
+    "@material-tailwind/react": "^2.0.1",
+    "@perawallet/connect": "^1.2.3",
+    "@randlabs/myalgo-connect": "^1.4.2",
+    "@txnlab/use-wallet": "^1.3.0",
+    "@walletconnect/client": "^1.8.0",
+    "algorand-walletconnect-qrcode-modal": "^1.8.0",
+    "algosdk": "^2.3.0",
+    "autoprefixer": "10.4.14",
+    "dotenv": "^16.0.3",
+    "encoding": "^0.1.13",
+    "eslint": "8.41.0",
+    "eslint-config-next": "13.4.3",
+    "next": "13.4.3",
+    "postcss": "8.4.23",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-icons": "^4.9.0",
+    "tailwindcss": "3.3.2",
+    "tsx": "^3.12.7"
+  },
+  "devDependencies": {
+    "bufferutil": "^4.0.7",
+    "socket.io": "^4.6.1",
+    "utf-8-validate": "^5.0.10",
+    "webpack": "^5.84.1",
+    "webpack-cli": "^5.1.1"
+  }
+}

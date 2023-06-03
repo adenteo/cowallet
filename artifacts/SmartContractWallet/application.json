@@ -1,0 +1,108 @@
+{
+    "hints": {
+        "create(string,uint64,uint64)string": {
+            "call_config": {
+                "no_op": "CREATE"
+            }
+        },
+        "set_owner(uint64,string)string": {
+            "call_config": {
+                "no_op": "CALL"
+            }
+        }
+    },
+    "source": {
+        "approval": "I3ByYWdtYSB2ZXJzaW9uIDgKaW50Y2Jsb2NrIDAgMQpieXRlY2Jsb2NrIDB4IDB4NmU2MTZkNjUgMHg3NDY4NzI2NTczNjg2ZjZjNjQgMHg3NDcyNjE2ZTczNjE2Mzc0Njk2ZjZlNzM0MzZmNzU2ZTc0IDB4NzY2NTcyNzM2OTZmNmUgMHgxNTFmN2M3NQp0eG5hIEFwcGxpY2F0aW9uQXJncyAwCnB1c2hieXRlcyAweDg1ZDg3NGUzIC8vICJjcmVhdGUoc3RyaW5nLHVpbnQ2NCx1aW50NjQpc3RyaW5nIgo9PQpibnogbWFpbl9sNAp0eG5hIEFwcGxpY2F0aW9uQXJncyAwCnB1c2hieXRlcyAweGY2NWE4ZTc5IC8vICJzZXRfb3duZXIodWludDY0LHN0cmluZylzdHJpbmciCj09CmJueiBtYWluX2wzCmVycgptYWluX2wzOgp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCiE9CiYmCmFzc2VydApjYWxsc3ViIHNldG93bmVyY2FzdGVyXzQKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDQ6CnR4biBPbkNvbXBsZXRpb24KaW50Y18wIC8vIE5vT3AKPT0KdHhuIEFwcGxpY2F0aW9uSUQKaW50Y18wIC8vIDAKPT0KJiYKYXNzZXJ0CmNhbGxzdWIgY3JlYXRlY2FzdGVyXzMKaW50Y18xIC8vIDEKcmV0dXJuCgovLyBwcmVmaXhfa2V5X2dlbgpwcmVmaXhrZXlnZW5fMDoKcHJvdG8gMSAxCnB1c2hieXRlcyAweDZmNzc2ZTY1NzI3MyAvLyAib3duZXJzIgpmcmFtZV9kaWcgLTEKY29uY2F0CnJldHN1YgoKLy8gY3JlYXRlCmNyZWF0ZV8xOgpwcm90byAzIDEKYnl0ZWNfMCAvLyAiIgpieXRlY18xIC8vICJuYW1lIgpieXRlY18wIC8vICIiCmFwcF9nbG9iYWxfcHV0CmJ5dGVjXzIgLy8gInRocmVzaG9sZCIKaW50Y18wIC8vIDAKYXBwX2dsb2JhbF9wdXQKYnl0ZWNfMyAvLyAidHJhbnNhY3Rpb25zQ291bnQiCmludGNfMCAvLyAwCmFwcF9nbG9iYWxfcHV0CmJ5dGVjIDQgLy8gInZlcnNpb24iCmludGNfMCAvLyAwCmFwcF9nbG9iYWxfcHV0CmJ5dGVjXzEgLy8gIm5hbWUiCmZyYW1lX2RpZyAtMwpleHRyYWN0IDIgMAphcHBfZ2xvYmFsX3B1dApieXRlYyA0IC8vICJ2ZXJzaW9uIgpmcmFtZV9kaWcgLTIKYXBwX2dsb2JhbF9wdXQKYnl0ZWNfMiAvLyAidGhyZXNob2xkIgpmcmFtZV9kaWcgLTEKYXBwX2dsb2JhbF9wdXQKYnl0ZWNfMyAvLyAidHJhbnNhY3Rpb25zQ291bnQiCmludGNfMCAvLyAwCmFwcF9nbG9iYWxfcHV0CnB1c2hieXRlcyAweDAwMWU0MzcyNjU2MTc0NjU2NDIwNzM2ZDYxNzI3NDIwNjM2ZjZlNzQ3MjYxNjM3NDIwNzc2MTZjNmM2NTc0MjEgLy8gMHgwMDFlNDM3MjY1NjE3NDY1NjQyMDczNmQ2MTcyNzQyMDYzNmY2ZTc0NzI2MTYzNzQyMDc3NjE2YzZjNjU3NDIxCmZyYW1lX2J1cnkgMApyZXRzdWIKCi8vIHNldF9vd25lcgpzZXRvd25lcl8yOgpwcm90byAyIDEKYnl0ZWNfMCAvLyAiIgpmcmFtZV9kaWcgLTIKaXRvYgpjYWxsc3ViIHByZWZpeGtleWdlbl8wCmZyYW1lX2RpZyAtMQpleHRyYWN0IDIgMAphcHBfZ2xvYmFsX3B1dApwdXNoYnl0ZXMgMHgwMDBhNTM2NTc0MjA2Zjc3NmU2NTcyMjEgLy8gMHgwMDBhNTM2NTc0MjA2Zjc3NmU2NTcyMjEKZnJhbWVfYnVyeSAwCnJldHN1YgoKLy8gY3JlYXRlX2Nhc3RlcgpjcmVhdGVjYXN0ZXJfMzoKcHJvdG8gMCAwCmJ5dGVjXzAgLy8gIiIKZHVwCmludGNfMCAvLyAwCmR1cAp0eG5hIEFwcGxpY2F0aW9uQXJncyAxCmZyYW1lX2J1cnkgMQp0eG5hIEFwcGxpY2F0aW9uQXJncyAyCmJ0b2kKZnJhbWVfYnVyeSAyCnR4bmEgQXBwbGljYXRpb25BcmdzIDMKYnRvaQpmcmFtZV9idXJ5IDMKZnJhbWVfZGlnIDEKZnJhbWVfZGlnIDIKZnJhbWVfZGlnIDMKY2FsbHN1YiBjcmVhdGVfMQpmcmFtZV9idXJ5IDAKYnl0ZWMgNSAvLyAweDE1MWY3Yzc1CmZyYW1lX2RpZyAwCmNvbmNhdApsb2cKcmV0c3ViCgovLyBzZXRfb3duZXJfY2FzdGVyCnNldG93bmVyY2FzdGVyXzQ6CnByb3RvIDAgMApieXRlY18wIC8vICIiCmludGNfMCAvLyAwCmJ5dGVjXzAgLy8gIiIKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQpidG9pCmZyYW1lX2J1cnkgMQp0eG5hIEFwcGxpY2F0aW9uQXJncyAyCmZyYW1lX2J1cnkgMgpmcmFtZV9kaWcgMQpmcmFtZV9kaWcgMgpjYWxsc3ViIHNldG93bmVyXzIKZnJhbWVfYnVyeSAwCmJ5dGVjIDUgLy8gMHgxNTFmN2M3NQpmcmFtZV9kaWcgMApjb25jYXQKbG9nCnJldHN1Yg==",
+        "clear": "I3ByYWdtYSB2ZXJzaW9uIDgKcHVzaGludCAwIC8vIDAKcmV0dXJu"
+    },
+    "state": {
+        "global": {
+            "num_byte_slices": 11,
+            "num_uints": 3
+        },
+        "local": {
+            "num_byte_slices": 0,
+            "num_uints": 0
+        }
+    },
+    "schema": {
+        "global": {
+            "declared": {
+                "name": {
+                    "type": "bytes",
+                    "key": "name",
+                    "descr": "Name of smart contract wallet"
+                },
+                "threshold": {
+                    "type": "uint64",
+                    "key": "threshold",
+                    "descr": "Signing threshold of smart contract wallet"
+                },
+                "transactionsCount": {
+                    "type": "uint64",
+                    "key": "transactionsCount",
+                    "descr": "Number of pending transactions in smart contract wallet"
+                },
+                "version": {
+                    "type": "uint64",
+                    "key": "version",
+                    "descr": "Smart wallet contract version number"
+                }
+            },
+            "reserved": {
+                "owners": {
+                    "type": "bytes",
+                    "max_keys": 10,
+                    "descr": "An owner's public address"
+                }
+            }
+        },
+        "local": {
+            "declared": {},
+            "reserved": {}
+        }
+    },
+    "contract": {
+        "name": "SmartContractWallet",
+        "methods": [
+            {
+                "name": "create",
+                "args": [
+                    {
+                        "type": "string",
+                        "name": "name"
+                    },
+                    {
+                        "type": "uint64",
+                        "name": "version"
+                    },
+                    {
+                        "type": "uint64",
+                        "name": "threshold"
+                    }
+                ],
+                "returns": {
+                    "type": "string"
+                }
+            },
+            {
+                "name": "set_owner",
+                "args": [
+                    {
+                        "type": "uint64",
+                        "name": "index"
+                    },
+                    {
+                        "type": "string",
+                        "name": "address"
+                    }
+                ],
+                "returns": {
+                    "type": "string"
+                }
+            }
+        ],
+        "networks": {}
+    },
+    "bare_call_config": {}
+}
