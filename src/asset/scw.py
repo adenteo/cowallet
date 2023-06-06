@@ -47,13 +47,13 @@ def create(name: abi.String, version: abi.Uint64, threshold: abi.Uint64, *, outp
         app.state.version.set(version.get()),
         app.state.threshold.set(threshold.get()),
         app.state.transactionsCount.set(Int(0)),
-        output.set("Created smart contract wallet!")
+        output.set("Created smart contract wallet.")
     )
 
 @app.external
 def set_owner(index: abi.Uint64, address: abi.String, *, output: abi.String):
     return Seq(app.state.owners[index].set(address.get()),
-               output.set("Set owner!"))
+               output.set("Set owner."))
 # @app.external
 # def opt_in(*, output: abi.String):
 #     return Seq(
@@ -70,6 +70,33 @@ def set_owner(index: abi.Uint64, address: abi.String, *, output: abi.String):
 #         InnerTxnBuilder.Submit(),
 #         output.set("Opted into smart wallet contract!")
 #     )
+
+
+@app.external
+def send_algos(amount: abi.Uint64, *, output: abi.String):
+    return Seq(
+        InnerTxnBuilder.Begin(),
+          InnerTxnBuilder.SetFields(
+            {
+                TxnField.type_enum: TxnType.Payment,
+                TxnField.amount: amount.get(),
+                TxnField.receiver: Txn.accounts[0]
+            }
+        ),
+        InnerTxnBuilder.Submit(),
+        output.set("Created payment txn.")
+    )
+
+
+@app.external
+def add_txn(name: abi.String, txn: abi.String,*,output: abi.String):
+    return Seq(
+        # App.box_put(Bytes("hello"), Bytes("test")),
+        App.box_put(name.get(), txn.get()),
+        # OR box created with box_put, size is implicitly the
+        # length of bytes written
+        output.set("Added txn to wallet.")
+    )
 
 
 if __name__ == "__main__":

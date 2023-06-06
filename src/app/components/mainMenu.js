@@ -18,11 +18,9 @@ export default function MainMenu({
     const createWallet = () => {
         console.log("Creating wallet");
         router.push("/create");
-        setCurrentStep({ createWallet: 1 });
     };
     return (
-        <div className="flex flex-col items-center justify-center h-screen">
-            <div className="max-w-xs overflow-auto">{activeAddress}</div>
+        <div className="flex flex-col items-center justify-center h-[94vh]">
             <div className="bg-white p-10 rounded-lg">
                 <h1 className="text-3xl font-bold text-center">
                     CoWallet

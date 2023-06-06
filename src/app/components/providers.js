@@ -10,7 +10,7 @@ export default function Providers() {
     // Finally, map through the `accounts` property to render a dropdown for each connected account.
     return (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white rounded-lg mx-auto max-w-xs max-h-96 my-auto lg:max-w-md">
-            <h1 className="font-bold">Choose a provider</h1>
+            <h1 className="font-bold text-black">Choose a provider</h1>
             {providers?.map((provider) => (
                 <div
                     key={"provider-" + provider.metadata.id}

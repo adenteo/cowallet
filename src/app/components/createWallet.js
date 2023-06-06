@@ -1,46 +1,53 @@
 "use client";
 import { BiWallet } from "react-icons/bi";
 import { useWallet } from "@txnlab/use-wallet";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { IoIosAddCircleOutline, IoIosArrowBack } from "react-icons/io";
-import AddOwnerPopup from "./addOwnerPopup";
-import algosdk, { isTransactionWithSigner, signTransaction } from "algosdk";
-import { getAlgodClient } from "../../clients";
 
-import { addOwners } from "../../useractions/addOwners";
-
-const algodClient = getAlgodClient(process.env.NEXT_PUBLIC_NETWORK);
-
-export default function CreateWallet() {
-    const router = useRouter();
-    const {
-        providers,
-        activeAccount,
-        isActive,
-        isReady,
-        activeAddress,
-        signer,
-        signTransactions,
-        sendTransactions,
-    } = useWallet();
-    useEffect(() => {
-        if (isReady && activeAddress && owners.length === 0) {
-            setOwners([activeAddress]);
-        }
-    });
-    const [owners, setOwners] = useState([]);
-    const [isPopupOpen, setIsPopupOpen] = useState(false);
-
-    const handleAddOwner = (address) => {
-        setOwners([...owners, address]);
+export default function CreateWallet({
+    showProviders,
+    setShowProviders,
+    setCurrentStep,
+}) {
+    const { providers, activeAccount, isActive, isReady, activeAddress } =
+        useWallet();
+    const connectWallet = () => {
+        setShowProviders(!showProviders);
     };
-
+    const [fields, setFields] = useState([{ value: "" }]);
     const [formData, setFormData] = useState({
         version: "",
         name: "",
         threshold: "",
     });
+    const createWallet = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch("/api/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData),
+            });
+            const result = await response.text();
+            console.log(result);
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    };
+
+    const handleChange = (index, event) => {
+        const values = [...fields];
+        values[index].value = event.target.value;
+        setFields(values);
+    };
+
+    const handleAddField = () => {
+        const values = [...fields];
+        values.push({ value: "" });
+        setFields(values);
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -52,9 +59,9 @@ export default function CreateWallet() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        console.log(formData);
+        console.log(fields);
         try {
-            formData["owners"] = owners;
-            formData["activeAddress"] = activeAddress;
             const response = await fetch("/api/create", {
                 method: "POST",
                 headers: {
@@ -62,33 +69,8 @@ export default function CreateWallet() {
                 },
                 body: JSON.stringify(formData),
             });
-            const txn = await response.json();
-
-            /** convert arrays back to Uint8Arrays - this is necessary due to the JSON 
-            serialisation process when object is returned from backend to frontend */
-
-            const uint8ArrayApprovalProgram = new Uint8Array(
-                Object.values(txn.approvalProgram)
-            );
-            const uint8ArrayClearProgram = new Uint8Array(
-                Object.values(txn.clearProgram)
-            );
-            const uint8ArrayAppArgs = txn.appArgs.map((appArg) => {
-                return new Uint8Array(Object.values(appArg));
-            });
-            txn.approvalProgram = uint8ArrayApprovalProgram;
-            txn.clearProgram = uint8ArrayClearProgram;
-            txn.appArgs = uint8ArrayAppArgs;
-            const appCreateTxn =
-                algosdk.makeApplicationCreateTxnFromObject(txn);
-            const encodedTxn = algosdk.encodeUnsignedTransaction(appCreateTxn);
-            const signedTxn = await signTransactions([encodedTxn]);
-            const result = await sendTransactions(signedTxn, 4);
-            const appId = result["application-index"];
+            const result = await response.text();
             console.log(result);
-            console.log(appId);
-            await addOwners(algodClient, activeAddress, signer, owners, appId);
-            router.push("/wallet/" + appId);
         } catch (error) {
             console.error("Error:", error);
         }
@@ -97,22 +79,15 @@ export default function CreateWallet() {
             name: "",
             threshold: "",
         });
-        setOwners([activeAddress]);
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-[94vh] max-h-[94vh]">
-            {isPopupOpen && (
-                <AddOwnerPopup
-                    owners={owners}
-                    onAddOwner={handleAddOwner}
-                    setIsPopupOpen={setIsPopupOpen}
-                />
-            )}
-            <div className="bg-white p-10 rounded-lg max-h-[88vh]">
+        <div className="flex flex-col items-center justify-center h-screen">
+            <div className="max-w-xs overflow-auto">{activeAddress}</div>
+            <div className="bg-white p-10 rounded-lg">
                 <label
                     onClick={() => {
-                        router.back();
+                        setCurrentStep({ mainMenu: 1 });
                     }}
                     className="flex cursor-pointer justify-center text-gray-600"
                 >
@@ -141,8 +116,7 @@ export default function CreateWallet() {
                         <div className="text-center my-3">Version</div>
                         <label>
                             <input
-                                type="number"
-                                min={1}
+                                type="text"
                                 name="version"
                                 placeholder="Enter version"
                                 className="w-full rounded border border-gray-300 px-4 py-2"
@@ -156,9 +130,7 @@ export default function CreateWallet() {
                             Signing threshold
                         </div>
                         <input
-                            type="number"
-                            min={1}
-                            max={owners.length}
+                            type="text"
                             className="w-full rounded border border-gray-300 px-4 py-2"
                             name="threshold"
                             placeholder="Enter threshold"
@@ -167,22 +139,35 @@ export default function CreateWallet() {
                             required
                         />
                         <br />
-                        <div className="text-center my-3">Owners</div>
-                        <div
-                            onClick={() => setIsPopupOpen(true)}
-                            className="rounded bg-green-500 px-4 py-2 text-base text-white hover:bg-green-700"
-                        >
+                        <div className="text-center my-3">
                             Add owners (Max: 10)
                         </div>
-                        <div className="text-center text-xs mt-1">
-                            {owners.length} / 10
+                        {fields.map((field, index) => (
+                            <div className="mb-4" key={index}>
+                                <input
+                                    type="text"
+                                    className="w-full rounded border border-gray-300 px-4 py-2"
+                                    placeholder="Enter public address"
+                                    value={field.value}
+                                    onChange={(event) =>
+                                        handleChange(index, event)
+                                    }
+                                    required
+                                />
+                            </div>
+                        ))}
+                        <div className="flex justify-end">
+                            <IoIosAddCircleOutline
+                                className="cursor-pointer text-2xl hover:text-slate-600"
+                                onClick={handleAddField}
+                            />
                         </div>
                         <div className="mt-4 flex justify-center">
                             <button
                                 type="submit"
-                                className="rounded bg-slate-800 px-4 py-2 text-base text-white hover:bg-slate-700"
+                                className="rounded bg-slate-800 px-4 py-2 text-base text-white hover:bg-slate-700 lg:mb-10"
                             >
-                                Create Wallet
+                                Next
                             </button>
                         </div>
                     </form>

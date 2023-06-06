@@ -42,7 +42,6 @@ const getBasicProgramBytes = async (relativeFilePath) => {
     // Read file for Teal code
     const filePath = path.join(__dirname, relativeFilePath);
     const data = fs.readFileSync(filePath);
-
     // use algod to compile the program
     const compiledProgram = await algodClient.compile(data).do();
     return new Uint8Array(Buffer.from(compiledProgram.result, "base64"));

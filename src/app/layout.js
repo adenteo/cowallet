@@ -6,10 +6,12 @@ import {
     initializeProviders,
     WalletProvider,
     PROVIDER_ID,
+    useWallet,
 } from "@txnlab/use-wallet";
 import { useEffect } from "react";
 import { getNetworkCredentials } from "../clients";
 import NavBar from "./components/navBar";
+import { useRouter } from "next/navigation";
 
 const network = process.env.NEXT_PUBLIC_NETWORK || "SandNet";
 const cred = getNetworkCredentials(network);
@@ -38,10 +40,20 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+    const { isReady, isActive } = useWallet();
+    const router = useRouter();
     useEffect(() => {
         console.log("reconnecting");
         reconnectProviders(walletProviders);
     }, []);
+
+    useEffect(() => {
+        if (isReady && !isActive) {
+            console.log("DISCONNECTED");
+            router.push("/");
+        }
+    });
+
     return (
         <html lang="en">
             <WalletProvider value={walletProviders}>

@@ -20,8 +20,7 @@ export default function Home() {
     return (
         <main>
             {Object.keys(currentStep)[0] === "mainMenu" && (
-                <Main
-                    Menu
+                <MainMenu
                     showProviders={showProviders}
                     setShowProviders={setShowProviders}
                     setCurrentStep={setCurrentStep}

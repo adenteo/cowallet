@@ -36,6 +36,34 @@
             "returns": {
                 "type": "string"
             }
+        },
+        {
+            "name": "send_algos",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "amount"
+                }
+            ],
+            "returns": {
+                "type": "string"
+            }
+        },
+        {
+            "name": "add_txn",
+            "args": [
+                {
+                    "type": "string",
+                    "name": "name"
+                },
+                {
+                    "type": "string",
+                    "name": "txn"
+                }
+            ],
+            "returns": {
+                "type": "string"
+            }
         }
     ],
     "networks": {}

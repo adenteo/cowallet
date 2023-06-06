@@ -1,16 +1,24 @@
 #pragma version 8
 intcblock 0 1
-bytecblock 0x 0x6e616d65 0x7468726573686f6c64 0x7472616e73616374696f6e73436f756e74 0x76657273696f6e 0x151f7c75
+bytecblock 0x 0x151f7c75 0x6e616d65 0x7468726573686f6c64 0x7472616e73616374696f6e73436f756e74 0x76657273696f6e
 txna ApplicationArgs 0
 pushbytes 0x85d874e3 // "create(string,uint64,uint64)string"
 ==
-bnz main_l4
+bnz main_l8
 txna ApplicationArgs 0
 pushbytes 0xf65a8e79 // "set_owner(uint64,string)string"
 ==
-bnz main_l3
+bnz main_l7
+txna ApplicationArgs 0
+pushbytes 0x8fb70a07 // "send_algos(uint64)string"
+==
+bnz main_l6
+txna ApplicationArgs 0
+pushbytes 0x16a16c05 // "add_txn(string,string)string"
+==
+bnz main_l5
 err
-main_l3:
+main_l5:
 txn OnCompletion
 intc_0 // NoOp
 ==
@@ -19,10 +27,34 @@ intc_0 // 0
 !=
 &&
 assert
-callsub setownercaster_4
+callsub addtxncaster_8
 intc_1 // 1
 return
-main_l4:
+main_l6:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub sendalgoscaster_7
+intc_1 // 1
+return
+main_l7:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub setownercaster_6
+intc_1 // 1
+return
+main_l8:
 txn OnCompletion
 intc_0 // NoOp
 ==
@@ -31,7 +63,7 @@ intc_0 // 0
 ==
 &&
 assert
-callsub createcaster_3
+callsub createcaster_5
 intc_1 // 1
 return
 
@@ -47,32 +79,32 @@ retsub
 create_1:
 proto 3 1
 bytec_0 // ""
-bytec_1 // "name"
+bytec_2 // "name"
 bytec_0 // ""
 app_global_put
-bytec_2 // "threshold"
+bytec_3 // "threshold"
 intc_0 // 0
 app_global_put
-bytec_3 // "transactionsCount"
+bytec 4 // "transactionsCount"
 intc_0 // 0
 app_global_put
-bytec 4 // "version"
+bytec 5 // "version"
 intc_0 // 0
 app_global_put
-bytec_1 // "name"
+bytec_2 // "name"
 frame_dig -3
 extract 2 0
 app_global_put
-bytec 4 // "version"
+bytec 5 // "version"
 frame_dig -2
 app_global_put
-bytec_2 // "threshold"
+bytec_3 // "threshold"
 frame_dig -1
 app_global_put
-bytec_3 // "transactionsCount"
+bytec 4 // "transactionsCount"
 intc_0 // 0
 app_global_put
-pushbytes 0x001e4372656174656420736d61727420636f6e74726163742077616c6c657421 // 0x001e4372656174656420736d61727420636f6e74726163742077616c6c657421
+pushbytes 0x001e4372656174656420736d61727420636f6e74726163742077616c6c65742e // 0x001e4372656174656420736d61727420636f6e74726163742077616c6c65742e
 frame_bury 0
 retsub
 
@@ -86,12 +118,41 @@ callsub prefixkeygen_0
 frame_dig -1
 extract 2 0
 app_global_put
-pushbytes 0x000a536574206f776e657221 // 0x000a536574206f776e657221
+pushbytes 0x000a536574206f776e65722e // 0x000a536574206f776e65722e
+frame_bury 0
+retsub
+
+// send_algos
+sendalgos_3:
+proto 1 1
+bytec_0 // ""
+itxn_begin
+intc_1 // pay
+itxn_field TypeEnum
+frame_dig -1
+itxn_field Amount
+txna Accounts 0
+itxn_field Receiver
+itxn_submit
+pushbytes 0x001443726561746564207061796d656e742074786e2e // 0x001443726561746564207061796d656e742074786e2e
+frame_bury 0
+retsub
+
+// add_txn
+addtxn_4:
+proto 2 1
+bytec_0 // ""
+frame_dig -2
+extract 2 0
+frame_dig -1
+extract 2 0
+box_put
+pushbytes 0x001441646465642074786e20746f2077616c6c65742e // 0x001441646465642074786e20746f2077616c6c65742e
 frame_bury 0
 retsub
 
 // create_caster
-createcaster_3:
+createcaster_5:
 proto 0 0
 bytec_0 // ""
 dup
@@ -110,14 +171,14 @@ frame_dig 2
 frame_dig 3
 callsub create_1
 frame_bury 0
-bytec 5 // 0x151f7c75
+bytec_1 // 0x151f7c75
 frame_dig 0
 concat
 log
 retsub
 
 // set_owner_caster
-setownercaster_4:
+setownercaster_6:
 proto 0 0
 bytec_0 // ""
 intc_0 // 0
@@ -131,7 +192,43 @@ frame_dig 1
 frame_dig 2
 callsub setowner_2
 frame_bury 0
-bytec 5 // 0x151f7c75
+bytec_1 // 0x151f7c75
+frame_dig 0
+concat
+log
+retsub
+
+// send_algos_caster
+sendalgoscaster_7:
+proto 0 0
+bytec_0 // ""
+intc_0 // 0
+txna ApplicationArgs 1
+btoi
+frame_bury 1
+frame_dig 1
+callsub sendalgos_3
+frame_bury 0
+bytec_1 // 0x151f7c75
+frame_dig 0
+concat
+log
+retsub
+
+// add_txn_caster
+addtxncaster_8:
+proto 0 0
+bytec_0 // ""
+dupn 2
+txna ApplicationArgs 1
+frame_bury 1
+txna ApplicationArgs 2
+frame_bury 2
+frame_dig 1
+frame_dig 2
+callsub addtxn_4
+frame_bury 0
+bytec_1 // 0x151f7c75
 frame_dig 0
 concat
 log
