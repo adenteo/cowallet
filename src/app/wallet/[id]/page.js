@@ -103,14 +103,11 @@ export default function Page({ params, searchParams }) {
                         .do();
                     const boxValue = boxResponse.value;
                     console.log(boxValue);
-                    const signaturesCount = Buffer.from(
+                    const signaturesCount = parseInt(
                         boxValue.slice(7, 8)
                     ).toString();
-                    console.log(parseInt(boxValue.slice(7, 8)).toString());
-                    console.log(boxValue.toString("utf8", 7, 8));
-                    console.log(signaturesCount);
                     const txnDecoded = algosdk.decodeUnsignedTransaction(
-                        boxValue.slice(7)
+                        boxValue.slice(8)
                     );
                     return {
                         name: Buffer.from(
