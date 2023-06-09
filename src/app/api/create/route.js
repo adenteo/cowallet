@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
-import { createScwTxnObject } from "../../../useractions";
+import { createScwTxn } from "../../../useractions";
+import algosdk from "algosdk";
 export async function POST(request) {
     const { name, version, threshold, activeAddress, owners } =
         await request.json();
-    const scwTxnObject = await createScwTxnObject(
+    const scwTxn = await createScwTxn(
         name,
         version,
         threshold,
         activeAddress,
         owners
     );
-    return new Response(JSON.stringify(scwTxnObject));
+    console.log(scwTxn);
+    const buffer = Buffer.from(scwTxn).toString("base64");
+    return new Response(Buffer.from(scwTxn).toString("base64"));
 }

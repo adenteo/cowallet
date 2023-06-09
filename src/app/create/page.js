@@ -62,27 +62,10 @@ export default function CreateWallet() {
                 },
                 body: JSON.stringify(formData),
             });
-            const txn = await response.json();
-
-            /** convert arrays back to Uint8Arrays - this is necessary due to the JSON 
-            serialisation process when object is returned from backend to frontend */
-
-            const uint8ArrayApprovalProgram = new Uint8Array(
-                Object.values(txn.approvalProgram)
-            );
-            const uint8ArrayClearProgram = new Uint8Array(
-                Object.values(txn.clearProgram)
-            );
-            const uint8ArrayAppArgs = txn.appArgs.map((appArg) => {
-                return new Uint8Array(Object.values(appArg));
-            });
-            txn.approvalProgram = uint8ArrayApprovalProgram;
-            txn.clearProgram = uint8ArrayClearProgram;
-            txn.appArgs = uint8ArrayAppArgs;
-            const appCreateTxn =
-                algosdk.makeApplicationCreateTxnFromObject(txn);
-            const encodedTxn = algosdk.encodeUnsignedTransaction(appCreateTxn);
-            const signedTxn = await signTransactions([encodedTxn]);
+            const txn = await response.text();
+            const signedTxn = await signTransactions([
+                Buffer.from(txn, "base64"),
+            ]);
             const result = await sendTransactions(signedTxn, 4);
             const appId = result["application-index"];
             console.log(result);

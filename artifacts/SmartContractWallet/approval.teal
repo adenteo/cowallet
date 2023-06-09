@@ -1,69 +1,119 @@
 #pragma version 8
-intcblock 0 1
-bytecblock 0x 0x151f7c75 0x6e616d65 0x7468726573686f6c64 0x7472616e73616374696f6e73436f756e74 0x76657273696f6e
+intcblock 0 1 8
+bytecblock 0x 0x151f7c75 0x6f776e657273436f756e74 0x7468726573686f6c64 0x6e616d65 0x76657273696f6e
+txn NumAppArgs
+intc_0 // 0
+==
+bnz main_l14
 txna ApplicationArgs 0
 pushbytes 0x85d874e3 // "create(string,uint64,uint64)string"
 ==
-bnz main_l8
+bnz main_l13
 txna ApplicationArgs 0
-pushbytes 0xf65a8e79 // "set_owner(uint64,string)string"
+pushbytes 0xfa703ebd // "set_owner(uint64,address)string"
 ==
-bnz main_l7
+bnz main_l12
 txna ApplicationArgs 0
-pushbytes 0x8fb70a07 // "send_algos(uint64)string"
+pushbytes 0x7e2d660d // "send_algos(uint64,string)string"
 ==
-bnz main_l6
+bnz main_l11
+txna ApplicationArgs 0
+pushbytes 0x70dc1653 // "sign_txn(string)uint64"
+==
+bnz main_l10
 txna ApplicationArgs 0
 pushbytes 0x16a16c05 // "add_txn(string,string)string"
 ==
-bnz main_l5
+bnz main_l9
+txna ApplicationArgs 0
+pushbytes 0x91e58fd3 // "remove_txn(string)void"
+==
+bnz main_l8
 err
-main_l5:
-txn OnCompletion
-intc_0 // NoOp
-==
-txn ApplicationID
-intc_0 // 0
-!=
-&&
-assert
-callsub addtxncaster_8
-intc_1 // 1
-return
-main_l6:
-txn OnCompletion
-intc_0 // NoOp
-==
-txn ApplicationID
-intc_0 // 0
-!=
-&&
-assert
-callsub sendalgoscaster_7
-intc_1 // 1
-return
-main_l7:
-txn OnCompletion
-intc_0 // NoOp
-==
-txn ApplicationID
-intc_0 // 0
-!=
-&&
-assert
-callsub setownercaster_6
-intc_1 // 1
-return
 main_l8:
 txn OnCompletion
 intc_0 // NoOp
 ==
 txn ApplicationID
 intc_0 // 0
+!=
+&&
+assert
+callsub removetxncaster_15
+intc_1 // 1
+return
+main_l9:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub addtxncaster_14
+intc_1 // 1
+return
+main_l10:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub signtxncaster_13
+intc_1 // 1
+return
+main_l11:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub sendalgoscaster_12
+intc_1 // 1
+return
+main_l12:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub setownercaster_11
+intc_1 // 1
+return
+main_l13:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
 ==
 &&
 assert
-callsub createcaster_5
+callsub createcaster_10
+intc_1 // 1
+return
+main_l14:
+txn OnCompletion
+intc_1 // OptIn
+==
+bnz main_l16
+err
+main_l16:
+txn ApplicationID
+intc_0 // 0
+!=
+assert
+callsub optin_3
 intc_1 // 1
 return
 
@@ -79,19 +129,19 @@ retsub
 create_1:
 proto 3 1
 bytec_0 // ""
-bytec_2 // "name"
+bytec 4 // "name"
 bytec_0 // ""
 app_global_put
-bytec_3 // "threshold"
+bytec_2 // "ownersCount"
 intc_0 // 0
 app_global_put
-bytec 4 // "transactionsCount"
+bytec_3 // "threshold"
 intc_0 // 0
 app_global_put
 bytec 5 // "version"
 intc_0 // 0
 app_global_put
-bytec_2 // "name"
+bytec 4 // "name"
 frame_dig -3
 extract 2 0
 app_global_put
@@ -100,9 +150,6 @@ frame_dig -2
 app_global_put
 bytec_3 // "threshold"
 frame_dig -1
-app_global_put
-bytec 4 // "transactionsCount"
-intc_0 // 0
 app_global_put
 pushbytes 0x001e4372656174656420736d61727420636f6e74726163742077616c6c65742e // 0x001e4372656174656420736d61727420636f6e74726163742077616c6c65742e
 frame_bury 0
@@ -116,43 +163,173 @@ frame_dig -2
 itob
 callsub prefixkeygen_0
 frame_dig -1
-extract 2 0
 app_global_put
-pushbytes 0x000a536574206f776e65722e // 0x000a536574206f776e65722e
+bytec_2 // "ownersCount"
+bytec_2 // "ownersCount"
+app_global_get
+intc_1 // 1
++
+app_global_put
+pushbytes 0x416464656420 // "Added "
+frame_dig -1
+concat
+pushbytes 0x206173206f776e65722e // " as owner."
+concat
+frame_bury 0
+frame_dig 0
+len
+itob
+extract 6 0
+frame_dig 0
+concat
 frame_bury 0
 retsub
 
+// opt_in
+optin_3:
+proto 0 0
+txn Sender
+callsub isOwner_8
+assert
+retsub
+
 // send_algos
-sendalgos_3:
-proto 1 1
+sendalgos_4:
+proto 2 1
 bytec_0 // ""
+txn Sender
+callsub isOwner_8
+assert
+frame_dig -1
+extract 2 0
+callsub hasMetSignaturesThreshold_9
+assert
 itxn_begin
 intc_1 // pay
 itxn_field TypeEnum
-frame_dig -1
+frame_dig -2
 itxn_field Amount
-txna Accounts 0
+txna Accounts 1
 itxn_field Receiver
 itxn_submit
-pushbytes 0x001443726561746564207061796d656e742074786e2e // 0x001443726561746564207061796d656e742074786e2e
+pushbytes 0x001d5375626d697474656420414c474f73207472616e736665722074786e2e // 0x001d5375626d697474656420414c474f73207472616e736665722074786e2e
+frame_bury 0
+retsub
+
+// sign_txn
+signtxn_5:
+proto 1 1
+intc_0 // 0
+txn Sender
+callsub isOwner_8
+assert
+frame_dig -1
+extract 2 0
+intc_0 // 0
+frame_dig -1
+extract 2 0
+intc_0 // 0
+intc_2 // 8
+box_extract
+btoi
+intc_1 // 1
++
+itob
+box_replace
+frame_dig -1
+extract 2 0
+intc_0 // 0
+intc_2 // 8
+box_extract
+btoi
+intc_1 // 1
++
 frame_bury 0
 retsub
 
 // add_txn
-addtxn_4:
+addtxn_6:
 proto 2 1
 bytec_0 // ""
+txn Sender
+callsub isOwner_8
+assert
 frame_dig -2
 extract 2 0
+intc_1 // 1
+itob
 frame_dig -1
 extract 2 0
+concat
 box_put
-pushbytes 0x001441646465642074786e20746f2077616c6c65742e // 0x001441646465642074786e20746f2077616c6c65742e
+pushbytes 0x001841646465642074786e20746f20626f782073746f72616765 // 0x001841646465642074786e20746f20626f782073746f72616765
 frame_bury 0
 retsub
 
+// remove_txn
+removetxn_7:
+proto 1 0
+txn Sender
+callsub isOwner_8
+assert
+frame_dig -1
+extract 2 0
+box_del
+assert
+retsub
+
+// isOwner
+isOwner_8:
+proto 1 1
+bytec_2 // "ownersCount"
+app_global_get
+store 0
+intc_0 // 0
+store 1
+isOwner_8_l1:
+load 1
+load 0
+<
+bz isOwner_8_l5
+load 1
+itob
+callsub prefixkeygen_0
+app_global_get
+frame_dig -1
+==
+bnz isOwner_8_l4
+load 1
+intc_1 // 1
++
+store 1
+b isOwner_8_l1
+isOwner_8_l4:
+intc_1 // 1
+retsub
+isOwner_8_l5:
+intc_0 // 0
+retsub
+
+// hasMetSignaturesThreshold
+hasMetSignaturesThreshold_9:
+proto 1 1
+frame_dig -1
+intc_0 // 0
+intc_2 // 8
+box_extract
+btoi
+bytec_3 // "threshold"
+app_global_get
+>=
+bnz hasMetSignaturesThreshold_9_l2
+intc_0 // 0
+retsub
+hasMetSignaturesThreshold_9_l2:
+intc_1 // 1
+retsub
+
 // create_caster
-createcaster_5:
+createcaster_10:
 proto 0 0
 bytec_0 // ""
 dup
@@ -178,7 +355,7 @@ log
 retsub
 
 // set_owner_caster
-setownercaster_6:
+setownercaster_11:
 proto 0 0
 bytec_0 // ""
 intc_0 // 0
@@ -199,15 +376,19 @@ log
 retsub
 
 // send_algos_caster
-sendalgoscaster_7:
+sendalgoscaster_12:
 proto 0 0
 bytec_0 // ""
 intc_0 // 0
+bytec_0 // ""
 txna ApplicationArgs 1
 btoi
 frame_bury 1
+txna ApplicationArgs 2
+frame_bury 2
 frame_dig 1
-callsub sendalgos_3
+frame_dig 2
+callsub sendalgos_4
 frame_bury 0
 bytec_1 // 0x151f7c75
 frame_dig 0
@@ -215,8 +396,25 @@ concat
 log
 retsub
 
+// sign_txn_caster
+signtxncaster_13:
+proto 0 0
+intc_0 // 0
+bytec_0 // ""
+txna ApplicationArgs 1
+frame_bury 1
+frame_dig 1
+callsub signtxn_5
+frame_bury 0
+bytec_1 // 0x151f7c75
+frame_dig 0
+itob
+concat
+log
+retsub
+
 // add_txn_caster
-addtxncaster_8:
+addtxncaster_14:
 proto 0 0
 bytec_0 // ""
 dupn 2
@@ -226,10 +424,20 @@ txna ApplicationArgs 2
 frame_bury 2
 frame_dig 1
 frame_dig 2
-callsub addtxn_4
+callsub addtxn_6
 frame_bury 0
 bytec_1 // 0x151f7c75
 frame_dig 0
 concat
 log
+retsub
+
+// remove_txn_caster
+removetxncaster_15:
+proto 0 0
+bytec_0 // ""
+txna ApplicationArgs 1
+frame_bury 0
+frame_dig 0
+callsub removetxn_7
 retsub

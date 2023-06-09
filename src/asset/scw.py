@@ -1,5 +1,8 @@
 from beaker import *
 from pyteal import *
+import base64
+
+
 
 class ScwState:
     name = GlobalStateValue(
@@ -22,10 +25,10 @@ class ScwState:
         default=Int(0),
         descr="Signing threshold of smart contract wallet"
     )
-    transactionsCount = GlobalStateValue(
+    ownersCount = GlobalStateValue(
         stack_type=TealType.uint64,
         default=Int(0),
-        descr="Number of pending transactions in smart contract wallet"
+        descr="Number of owners in smart contract wallet"
     )
     
 
@@ -33,11 +36,6 @@ class ScwState:
 APP_NAME = "SmartContractWallet"
 app = Application(APP_NAME, state=ScwState())
 
-def isOwner():
-    encoded = app.state.owners.get()
-    decoded = Base64Decode(encoded)
-    array = list(decoded)
-    return True
 
 @app.create
 def create(name: abi.String, version: abi.Uint64, threshold: abi.Uint64, *, output: abi.String):
@@ -46,57 +44,86 @@ def create(name: abi.String, version: abi.Uint64, threshold: abi.Uint64, *, outp
         app.state.name.set(name.get()),
         app.state.version.set(version.get()),
         app.state.threshold.set(threshold.get()),
-        app.state.transactionsCount.set(Int(0)),
-        output.set("Created smart contract wallet.")
+        output.set("Created smart contract wallet."),
     )
 
 @app.external
-def set_owner(index: abi.Uint64, address: abi.String, *, output: abi.String):
+def set_owner(index: abi.Uint64, address: abi.Address, *, output: abi.String):
     return Seq(app.state.owners[index].set(address.get()),
-               output.set("Set owner."))
-# @app.external
-# def opt_in(*, output: abi.String):
-#     return Seq(
-#         Assert(Txn.sender() == app.state.owners[1].get()),
-#         InnerTxnBuilder.Begin(),
-#         InnerTxnBuilder.SetFields(
-#             {
-#                 TxnField.type_enum: TxnType.AssetTransfer,
-#                 TxnField.asset_amount: Int(0),
-#                 TxnField.asset_receiver: Global.current_application_address(),
-#                 TxnField.xfer_asset: Txn.assets[0],
-#             }
-#         ),
-#         InnerTxnBuilder.Submit(),
-#         output.set("Opted into smart wallet contract!")
-#     )
+               app.state.ownersCount.set(app.state.ownersCount.get() + Int(1)),
+               output.set(Concat(Bytes("Added "), address.get(), Bytes(" as owner."))))
+
+
+@app.opt_in(bare=True)
+def opt_in():
+    return Seq(
+        Assert(isOwner(Txn.sender())), 
+        app.initialize_local_state())
+
 
 
 @app.external
-def send_algos(amount: abi.Uint64, *, output: abi.String):
+def send_algos(amount: abi.Uint64, boxName: abi.String, *, output: abi.String):
     return Seq(
+        Assert(isOwner(Txn.sender())),
+        Assert(hasMetSignaturesThreshold(boxName.get())),
         InnerTxnBuilder.Begin(),
           InnerTxnBuilder.SetFields(
             {
                 TxnField.type_enum: TxnType.Payment,
                 TxnField.amount: amount.get(),
-                TxnField.receiver: Txn.accounts[0]
+                TxnField.receiver: Txn.accounts[1]
             }
         ),
         InnerTxnBuilder.Submit(),
-        output.set("Created payment txn.")
+        output.set("Submitted ALGOs transfer txn.")
     )
+
+@app.external
+def sign_txn(name: abi.String,*,output: abi.Uint64):
+    currentSignaturesCount = App.box_extract(name.get(), Int(0), Int(8))
+    newSignaturesCount = Btoi(currentSignaturesCount) + Int(1)
+    return Seq([
+        Assert(isOwner(Txn.sender())),
+        App.box_replace(name.get(),Int(0), Itob(newSignaturesCount)),
+        output.set(newSignaturesCount)
+    ])
 
 
 @app.external
 def add_txn(name: abi.String, txn: abi.String,*,output: abi.String):
-    return Seq(
-        # App.box_put(Bytes("hello"), Bytes("test")),
-        App.box_put(name.get(), txn.get()),
-        # OR box created with box_put, size is implicitly the
-        # length of bytes written
-        output.set("Added txn to wallet.")
-    )
+    return Seq([
+        Assert(isOwner(Txn.sender())),
+        App.box_put(name.get(), Concat(Itob(Int(1)), txn.get())), # First byte will be number of current signatures
+        output.set("Added txn to box storage")
+    ])
+
+@app.external
+def remove_txn(name: abi.String):
+    return Seq([
+        Assert(isOwner(Txn.sender())),
+        Assert(App.box_delete(name.get()))
+    ])
+
+@Subroutine(TealType.uint64)
+def isOwner(sender):
+    totalOwners = ScratchVar(TealType.uint64)
+    i = ScratchVar(TealType.uint64)
+    return Seq([
+        totalOwners.store(app.state.ownersCount.get()),
+        For(i.store(Int(0)), i.load() < totalOwners.load(), i.store(i.load() + Int(1))).Do(
+            If(app.state.owners[Itob(i.load())] == sender).Then(Return(Int(1))),
+        ),
+        Return(Int(0))
+    ])
+    
+@Subroutine(TealType.uint64)
+def hasMetSignaturesThreshold(boxName):
+    signaturesCount = App.box_extract(boxName, Int(0), Int(8))
+    return Seq([
+        If((Btoi(signaturesCount)) >= app.state.threshold).Then(Return(Int(1))).Else(Return(Int(0)))
+    ])
+
 
 
 if __name__ == "__main__":

@@ -1,19 +1,18 @@
 "use client";
 import { useWallet } from "@txnlab/use-wallet";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext, createContext } from "react";
 import algosdk from "algosdk";
 import { getAlgodClient } from "../../../clients";
 import { readGlobalState } from "../../../actions";
+import Transactions from "../../components/transactions";
+import WalletContext from "@/app/components/walletContext";
+const { v4: uuidv4 } = require("uuid");
 
 const algodClient = getAlgodClient(process.env.NEXT_PUBLIC_NETWORK);
 const contractData = require("../../../../artifacts/SmartContractWallet/contract.json");
 const contract = new algosdk.ABIContract(contractData);
 
 export default function Page({ params, searchParams }) {
-    const appId = params.id;
-    const appAddr = algosdk.getApplicationAddress(parseInt(appId));
-    const [accInfo, setAccInfo] = useState(null);
-    const [appInfo, setAppInfo] = useState(null);
     const {
         providers,
         activeAccount,
@@ -25,10 +24,27 @@ export default function Page({ params, searchParams }) {
         sendTransactions,
     } = useWallet();
 
-    const handleSendAlgos = async () => {
+    const [txns, setTxns] = useState([]);
+    const [count, setCount] = useState(0);
+    const [renderWallet, setRenderWallet] = useState(false);
+    const [accInfo, setAccInfo] = useState(null);
+    const [appInfo, setAppInfo] = useState(null);
+
+    const appId = params.id;
+    const appAddr = algosdk.getApplicationAddress(parseInt(appId));
+
+    const handleWalletRender = () => {
+        console.log("Re rendering wallet");
+        setRenderWallet(!renderWallet);
+    };
+
+    const handleSendAlgos = async (appId, activeAddress, signer) => {
+        // Create payment app call transaction
+        const transactionId = uuidv4(); // Initialise txn uuid
+        const atc = new algosdk.AtomicTransactionComposer();
         const suggestedParams = await algodClient.getTransactionParams().do();
         const commonParams = {
-            appID: parseInt(appId),
+            appID: appId,
             sender: activeAddress,
             suggestedParams,
             signer,
@@ -38,64 +54,117 @@ export default function Page({ params, searchParams }) {
             appAccounts: [
                 "L7ULOG442UZG46XLFOMZNPJ7GXWM3HP5LOZZFF3QI323JLS4CXHTEL6WQA",
             ],
-            methodArgs: [parseInt(100000)],
+            methodArgs: [parseInt(100000), transactionId],
             ...commonParams,
         };
-        const atc = new algosdk.AtomicTransactionComposer();
         atc.addMethodCall(trfAlgosAppCall);
         const txnGrp = atc.buildGroup();
-        const txnInfo = txnGrp[0].txn;
-        const nameUint8Arr = new Uint8Array(Buffer.from("Txn2"));
-        const txnInfoUint8Arr = new Uint8Array(Buffer.from(txnInfo.toString()));
-        console.log(txnInfoUint8Arr);
-        // add transaction to boxes
+        const txn = txnGrp[0].txn;
+
+        const encodedTxn = algosdk.encodeUnsignedTransaction(txn);
+        const txnNameUint8Arr = new Uint8Array(Buffer.from(transactionId));
+
+        // Make app call to store transaction in boxes
         const storeTxnAppCall = {
             method: contract.getMethodByName("add_txn"),
-            methodArgs: ["Txn2", txnInfoUint8Arr],
-            boxes: [{ appIndex: 0, name: nameUint8Arr }],
+            methodArgs: [transactionId, encodedTxn],
+            boxes: [{ appIndex: 0, name: txnNameUint8Arr }],
             ...commonParams,
         };
         const atc2 = new algosdk.AtomicTransactionComposer();
         atc2.addMethodCall(storeTxnAppCall);
-        console.log(atc2);
-        const txn = await atc2.execute(algodClient, 4);
-        console.log(txn);
+        const result = await atc2.execute(algodClient, 4);
     };
 
+    // Fetch wallet information e.g. name, balance, address
     useEffect(() => {
         const getWalletInfo = async () => {
+            console.log("Fetching wallet info");
             const info = await algodClient.accountInformation(appAddr).do();
-            setAccInfo(info);
-            const appGlobalStatesDecodedObject = await readGlobalState(
+            const appGlobalStateDecodedObject = await readGlobalState(
                 parseInt(appId)
             );
-            console.log(appGlobalStatesDecodedObject);
-            setAppInfo(appGlobalStatesDecodedObject);
-            // setAppInfo(appGlobalStatesDecoded);
-            // console.log(appInfo);
-            // walletVersion = appInfo.find((obj) => obj.version);
-            // console.log(walletVersion);
+            setAccInfo(info);
+            setAppInfo(appGlobalStateDecodedObject);
         };
         getWalletInfo();
-    }, []);
+    }, [renderWallet]);
+
+    // Fetch current pending transactions from boxes
+    useEffect(() => {
+        const getBoxNames = async () => {
+            const boxesResponse = await algodClient
+                .getApplicationBoxes(parseInt(appId))
+                .do();
+            const txnsInfo = await Promise.all(
+                boxesResponse.boxes.map(async (box) => {
+                    const boxResponse = await algodClient
+                        .getApplicationBoxByName(parseInt(appId), box.name)
+                        .do();
+                    const boxValue = boxResponse.value;
+                    console.log(boxValue);
+                    const signaturesCount = Buffer.from(
+                        boxValue.slice(7, 8)
+                    ).toString();
+                    console.log(parseInt(boxValue.slice(7, 8)).toString());
+                    console.log(boxValue.toString("utf8", 7, 8));
+                    console.log(signaturesCount);
+                    const txnDecoded = algosdk.decodeUnsignedTransaction(
+                        boxValue.slice(7)
+                    );
+                    return {
+                        name: Buffer.from(
+                            boxResponse.name,
+                            "base64"
+                        ).toString(),
+                        txn: txnDecoded,
+                        signatures: parseInt(signaturesCount),
+                    };
+                })
+            );
+            setTxns(txnsInfo);
+        };
+        getBoxNames();
+    }, [count, renderWallet]);
 
     return (
-        appInfo && (
-            <section className="">
-                <div className="bg-white m-8 rounded-lg">
-                    <div className="px-2 pt-2 text-lg font-bold">
-                        {appInfo.name}
+        <WalletContext.Provider value={{ handleWalletRender }}>
+            {appInfo && (
+                <section>
+                    <div className="bg-white m-8 rounded-lg p-4">
+                        <div className="px-2 pt-2 text-lg font-bold">
+                            {appInfo.name}
+                        </div>
+                        <div className="px-2 text-xs">Wallet ID: {appId}</div>
+                        <div className="px-2 text-xs">
+                            Wallet Address: {appAddr}
+                        </div>
+                        <div className="px-2 text-xs">
+                            Balance: {accInfo.amount}
+                        </div>
                     </div>
-                    <div className="px-2 text-xs">Wallet ID: {appId}</div>
-                    <div className="px-2 text-xs">
-                        Wallet Address: {appAddr}
-                    </div>
-                    <div className="px-2 text-xs">
-                        Balance: {accInfo.amount}
-                    </div>
-                </div>
-                <button onClick={handleSendAlgos}>Send algos</button>
-            </section>
-        )
+                    <button
+                        onClick={() => {
+                            console.log(renderWallet);
+                        }}
+                    >
+                        Test
+                    </button>
+                    <button
+                        onClick={async () => {
+                            await handleSendAlgos(
+                                parseInt(appId),
+                                activeAddress,
+                                signer
+                            );
+                            setCount((prevCount) => prevCount + 1);
+                        }}
+                    >
+                        Send algos
+                    </button>
+                    <Transactions txns={txns} appId={appId} appInfo={appInfo} />
+                </section>
+            )}
+        </WalletContext.Provider>
     );
 }

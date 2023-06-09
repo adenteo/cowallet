@@ -13,7 +13,7 @@ const algodClient = getAlgodClient(process.env.NEXT_PUBLIC_NETWORK);
 
     const paymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
         from: creator.addr,
-        to: "C4QEEOUXSGX2JISLNDYS2GMNA3R22UW7U43OFLUQHTBIOYK7BYQ7FB3BTM",
+        to: "2ROW6Z2GPRF2IW7GREAWDRL7ADO44NJCCNW62ZMCTCJLPLZVSTSAKBQTFI",
         amount: 1000000,
         suggestedParams,
     });

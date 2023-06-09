@@ -8,27 +8,21 @@ const readGlobalState = async (appId) => {
 
     // global state is a key value array
     const globalState = app.params["global-state"];
-    const textDecoder = new TextDecoder();
-    const gsmap = new Map();
-    globalState.forEach((item) => {
-        // decode from base64 and utf8
-        const formattedKey = textDecoder.decode(
-            Buffer.from(item.key, "base64")
-        );
-
-        let formattedValue;
-        if (item.value.type === 1) {
-            formattedValue = textDecoder.decode(
-                Buffer.from(item.value.bytes, "base64")
-            );
-        } else {
-            formattedValue = item.value.uint;
-        }
-
-        gsmap.set(formattedKey, formattedValue);
+    const globalStateDecoded = globalState.map((state) => {
+        const decodedKey = Buffer.from(state.key, "base64").toString();
+        const decodedValue =
+            state.value.type == 1
+                ? Buffer.from(state.value.bytes, "base64").toString()
+                : state.value.uint;
+        return { [decodedKey]: decodedValue };
     });
-
-    return gsmap;
+    const appGlobalStateDecodedObject = globalStateDecoded.reduce(
+        (acc, obj) => {
+            return { ...acc, ...obj };
+        },
+        {}
+    );
+    return appGlobalStateDecodedObject;
 };
 
 module.exports = {

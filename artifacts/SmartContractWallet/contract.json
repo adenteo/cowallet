@@ -29,7 +29,7 @@
                     "name": "index"
                 },
                 {
-                    "type": "string",
+                    "type": "address",
                     "name": "address"
                 }
             ],
@@ -43,10 +43,26 @@
                 {
                     "type": "uint64",
                     "name": "amount"
+                },
+                {
+                    "type": "string",
+                    "name": "boxName"
                 }
             ],
             "returns": {
                 "type": "string"
+            }
+        },
+        {
+            "name": "sign_txn",
+            "args": [
+                {
+                    "type": "string",
+                    "name": "name"
+                }
+            ],
+            "returns": {
+                "type": "uint64"
             }
         },
         {
@@ -63,6 +79,18 @@
             ],
             "returns": {
                 "type": "string"
+            }
+        },
+        {
+            "name": "remove_txn",
+            "args": [
+                {
+                    "type": "string",
+                    "name": "name"
+                }
+            ],
+            "returns": {
+                "type": "void"
             }
         }
     ],
