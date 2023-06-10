@@ -80,13 +80,12 @@ def send_algos(amount: abi.Uint64, boxName: abi.String, *, output: abi.String):
     )
 
 @app.external
-def sign_txn(name: abi.String,*,output: abi.Uint64):
-    currentSignaturesCount = App.box_extract(name.get(), Int(0), Int(8))
-    newSignaturesCount = Btoi(currentSignaturesCount) + Int(1)
+def sign_txn(name: abi.String,*,output: abi.String):
+    index = isOwner(Txn.sender())
     return Seq([
-        Assert(isOwner(Txn.sender())),
-        App.box_replace(name.get(),Int(0), Itob(newSignaturesCount)),
-        output.set(newSignaturesCount)
+        Assert(index),
+        App.box_replace(name.get(), index - Int(1), Bytes("1")),
+        output.set(Concat(Txn.sender(), Bytes(" signed transaction "), name.get()))
     ])
 
 
@@ -94,7 +93,7 @@ def sign_txn(name: abi.String,*,output: abi.Uint64):
 def add_txn(name: abi.String, txn: abi.String,*,output: abi.String):
     return Seq([
         Assert(isOwner(Txn.sender())),
-        App.box_put(name.get(), Concat(Itob(Int(1)), txn.get())), # First byte will be number of current signatures
+        App.box_put(name.get(), Concat(Substring(Bytes("1000000000"), Int(0), app.state.ownersCount.get()), txn.get())),
         output.set("Added txn to box storage")
     ])
 
@@ -105,6 +104,7 @@ def remove_txn(name: abi.String):
         Assert(App.box_delete(name.get()))
     ])
 
+# Checks if sender is owner. Returns 1-based index of owner in the reserved global state values if exists
 @Subroutine(TealType.uint64)
 def isOwner(sender):
     totalOwners = ScratchVar(TealType.uint64)
@@ -112,16 +112,26 @@ def isOwner(sender):
     return Seq([
         totalOwners.store(app.state.ownersCount.get()),
         For(i.store(Int(0)), i.load() < totalOwners.load(), i.store(i.load() + Int(1))).Do(
-            If(app.state.owners[Itob(i.load())] == sender).Then(Return(Int(1))),
+            If(app.state.owners[Itob(i.load())] == sender).Then(Return(i.load() + Int(1))),
         ),
         Return(Int(0))
     ])
-    
+
+
 @Subroutine(TealType.uint64)
 def hasMetSignaturesThreshold(boxName):
-    signaturesCount = App.box_extract(boxName, Int(0), Int(8))
+    totalOwners = ScratchVar(TealType.uint64)
+    signaturesCount = ScratchVar(TealType.uint64)
+    i = ScratchVar(TealType.uint64)
     return Seq([
-        If((Btoi(signaturesCount)) >= app.state.threshold).Then(Return(Int(1))).Else(Return(Int(0)))
+        totalOwners.store(app.state.ownersCount.get()),
+        signaturesCount.store(Int(0)),
+        For(i.store(Int(0)), i.load() < totalOwners.load(), i.store(i.load() + Int(1))).Do(
+            If(App.box_extract(boxName, i.load(), Int(1)) == Bytes("1")).Then(
+                signaturesCount.store(signaturesCount.load() + Int(1))
+            )
+        ),
+        If(signaturesCount.load() >= app.state.threshold).Then(Return(Int(1))).Else(Return(Int(0)))
     ])
 
 

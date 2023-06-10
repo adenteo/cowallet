@@ -30,11 +30,10 @@ const AddOwnerPopup = ({ onAddOwner, owners, setIsPopupOpen }) => {
                 />
                 <input
                     type="text"
-                    className={`border rounded p-2 mb-2 px-4 py-2 ${validIndicator}`}
+                    className={`border rounded p-2 mb-2 px-4 py-2 ${validIndicator} focus:outline-0`}
                     placeholder="Enter address"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    style={{ outline: "none" }}
                 />
                 <button
                     className="bg-slate-800 px-4 py-2 ml-3 text-base text-white hover:bg-slate-700 lg:mb-10 rounded"

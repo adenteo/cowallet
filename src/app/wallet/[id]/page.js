@@ -40,7 +40,7 @@ export default function Page({ params, searchParams }) {
 
     const handleSendAlgos = async (appId, activeAddress, signer) => {
         // Create payment app call transaction
-        const transactionId = uuidv4(); // Initialise txn uuid
+        const transactionId = uuidv4(); // Initialise txn uuid. There's probably other ways to ensure unique names and save fees with shorter names.
         const atc = new algosdk.AtomicTransactionComposer();
         const suggestedParams = await algodClient.getTransactionParams().do();
         const commonParams = {
@@ -96,6 +96,9 @@ export default function Page({ params, searchParams }) {
             const boxesResponse = await algodClient
                 .getApplicationBoxes(parseInt(appId))
                 .do();
+            const appGlobalStateDecodedObject = await readGlobalState(
+                parseInt(appId)
+            );
             const txnsInfo = await Promise.all(
                 boxesResponse.boxes.map(async (box) => {
                     const boxResponse = await algodClient
@@ -103,11 +106,17 @@ export default function Page({ params, searchParams }) {
                         .do();
                     const boxValue = boxResponse.value;
                     console.log(boxValue);
-                    const signaturesCount = parseInt(
-                        boxValue.slice(7, 8)
-                    ).toString();
+                    let signaturesCount = 0;
+                    boxValue
+                        .slice(0, appGlobalStateDecodedObject.ownersCount)
+                        .forEach((value) => {
+                            if (value === 49) {
+                                signaturesCount += 1;
+                            }
+                        });
+
                     const txnDecoded = algosdk.decodeUnsignedTransaction(
-                        boxValue.slice(8)
+                        boxValue.slice(appGlobalStateDecodedObject.ownersCount)
                     );
                     return {
                         name: Buffer.from(

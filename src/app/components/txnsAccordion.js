@@ -95,6 +95,7 @@ export default function TxnsAccordion({ txns, appId, appInfo }) {
         };
         atc.addMethodCall(signTxnAppCall);
         const result = await atc.execute(algodClient, 4);
+        handleWalletRender();
     };
 
     return (
