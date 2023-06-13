@@ -29,21 +29,22 @@ export default function NavBar() {
                 </div>
             )} */}
             {showDropdown && (
-                <div className="bg-white absolute top-[6vh] right-0 text-black p-4 px-4 rounded font-semibold text-xs py-2 border-b-4 border-slate-800 shadow-lg shadow-slate-500/50">
+                <div className="bg-white absolute top-[6vh] right-0 text-black px-4 rounded font-semibold text-xs py-2 border-b-4 border-slate-800 shadow-lg shadow-slate-500/50">
                     {providers?.map(
                         (provider) =>
                             provider.isActive && (
                                 <div
                                     key={"provider-" + provider.metadata.id}
-                                    className="text-center"
+                                    className="text-center text-xs"
                                 >
                                     <span className="border-b-2 p-1 rounded-md border-black">
                                         {provider.metadata.name}
                                     </span>
-                                    <div className="p-2">
+                                    <div className="p-2 text-xs max-w-[90vw]">
                                         {provider.isActive &&
                                             provider.accounts.length && (
                                                 <select
+                                                    className="text-xs max-w-[90vw] overflow-hidden text-ellipsis"
                                                     value={
                                                         activeAccount?.address
                                                     }
@@ -56,6 +57,7 @@ export default function NavBar() {
                                                     {provider.accounts.map(
                                                         (account) => (
                                                             <option
+                                                                className="text-xs max-w-[90vw] overflow-hidden text-ellipsis"
                                                                 key={
                                                                     account.address
                                                                 }

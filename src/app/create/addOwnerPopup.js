@@ -1,15 +1,34 @@
 import { useState } from "react";
 import { AiOutlineCloseCircle } from "react-icons/ai";
-const AddOwnerPopup = ({ onAddOwner, owners, setIsPopupOpen }) => {
+import { getAlgodClient } from "../../clients";
+
+const algodClient = getAlgodClient(process.env.NEXT_PUBLIC_NETWORK);
+
+const AddOwnerPopup = ({ onAddOwner, owners, setIsAddOwnersPopupOpen }) => {
     const [address, setAddress] = useState("");
     const [error, setError] = useState(false);
-
-    const handleAddOwner = () => {
+    const [errorMsg, setErrorMsg] = useState("");
+    const handleAddOwner = async () => {
         if (address.trim() !== "" && isAddressValid) {
+            setError(false);
+            try {
+                await algodClient.accountInformation(address).do();
+            } catch (err) {
+                console.log("error");
+                setErrorMsg("Account does not exist.");
+                setError(true);
+                return;
+            }
+            if (owners.includes(address)) {
+                setErrorMsg("Account already added as owner.");
+                setError(true);
+                return;
+            }
             onAddOwner(address);
             setAddress("");
             setError(false);
         } else {
+            setErrorMsg("Please enter a valid 58 character address.");
             setError(true);
         }
     };
@@ -21,30 +40,31 @@ const AddOwnerPopup = ({ onAddOwner, owners, setIsPopupOpen }) => {
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-4 rounded max-w-screen-xl">
+            <div className="bg-white p-8 rounded-xl max-w-screen-xl">
                 <AiOutlineCloseCircle
-                    className="mx-auto m-2 text-2xl my-4 hover:text-gray-600"
+                    className="mx-auto m-2 text-2xl my-4 hover:text-gray-600 cursor-pointer"
                     onClick={() => {
-                        setIsPopupOpen(false);
+                        setIsAddOwnersPopupOpen(false);
                     }}
                 />
-                <input
-                    type="text"
-                    className={`border rounded p-2 mb-2 px-4 py-2 ${validIndicator} focus:outline-0`}
-                    placeholder="Enter address"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                />
+                <div className="flex flex-col">
+                    <input
+                        type="text"
+                        className={`${validIndicator} rounded p-2 mb-2 px-4 py-2`}
+                        placeholder="Enter address"
+                        value={address}
+                        maxLength={58}
+                        onChange={(e) => setAddress(e.target.value)}
+                    />
+                </div>
                 <button
-                    className="bg-slate-800 px-4 py-2 ml-3 text-base text-white hover:bg-slate-700 lg:mb-10 rounded"
+                    className="bg-slate-800 px-4 py-2 text-base text-white hover:bg-slate-700 rounded my-2 w-full"
                     onClick={handleAddOwner}
                 >
                     Add Owner
                 </button>
-                {error && !isAddressValid && (
-                    <div className="text-red-500 text-xs">
-                        Please enter a valid 58 character address.
-                    </div>
+                {error && (
+                    <div className="text-red-500 text-xs">{errorMsg}</div>
                 )}
                 {owners.length > 0 && (
                     <div className="mt-4 max-w-xs">

@@ -30,11 +30,11 @@ export default function MainMenu({
                     <div>
                         <div
                             onClick={createWallet}
-                            className="bg-slate-800 p-5 rounded-xl my-4 font-semibold text-white hover:bg-slate-600"
+                            className="bg-slate-800 p-5 rounded-xl my-4 font-semibold text-white hover:bg-slate-600 hover:scale-105"
                         >
                             Create CoWallet
                         </div>
-                        <div className="bg-slate-800 p-5 rounded-xl my-4 font-semibold text-white hover:bg-slate-600">
+                        <div className="bg-slate-800 p-5 rounded-xl my-4 font-semibold text-white hover:bg-slate-600 hover:scale-105">
                             Load CoWallet
                         </div>
                     </div>

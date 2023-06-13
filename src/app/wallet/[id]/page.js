@@ -6,11 +6,12 @@ import { getAlgodClient } from "../../../clients";
 import { readGlobalState } from "../../../actions";
 import Transactions from "../../components/transactions";
 import WalletContext from "@/app/components/walletContext";
-const { v4: uuidv4 } = require("uuid");
+import { MdCallReceived } from "react-icons/md";
+import { BiSend, BiCopy } from "react-icons/bi";
+import AddTransaction from "@/app/components/addTransaction";
+import WalletInfo from "@/app/components/walletInfo";
 
 const algodClient = getAlgodClient(process.env.NEXT_PUBLIC_NETWORK);
-const contractData = require("../../../../artifacts/SmartContractWallet/contract.json");
-const contract = new algosdk.ABIContract(contractData);
 
 export default function Page({ params, searchParams }) {
     const {
@@ -27,6 +28,9 @@ export default function Page({ params, searchParams }) {
     const [txns, setTxns] = useState([]);
     const [count, setCount] = useState(0);
     const [renderWallet, setRenderWallet] = useState(false);
+    const [isCreateTxnPopupOpen, setIsCreateTxnPopupOpen] = useState(false);
+    const [isShowWalletInfoPopupOpen, setIsShowWalletInfoPopupOpen] =
+        useState(false);
     const [accInfo, setAccInfo] = useState(null);
     const [appInfo, setAppInfo] = useState(null);
 
@@ -36,44 +40,6 @@ export default function Page({ params, searchParams }) {
     const handleWalletRender = () => {
         console.log("Re rendering wallet");
         setRenderWallet(!renderWallet);
-    };
-
-    const handleSendAlgos = async (appId, activeAddress, signer) => {
-        // Create payment app call transaction
-        const transactionId = uuidv4(); // Initialise txn uuid. There's probably other ways to ensure unique names and save fees with shorter names.
-        const atc = new algosdk.AtomicTransactionComposer();
-        const suggestedParams = await algodClient.getTransactionParams().do();
-        const commonParams = {
-            appID: appId,
-            sender: activeAddress,
-            suggestedParams,
-            signer,
-        };
-        const trfAlgosAppCall = {
-            method: contract.getMethodByName("send_algos"),
-            appAccounts: [
-                "L7ULOG442UZG46XLFOMZNPJ7GXWM3HP5LOZZFF3QI323JLS4CXHTEL6WQA",
-            ],
-            methodArgs: [parseInt(100000), transactionId],
-            ...commonParams,
-        };
-        atc.addMethodCall(trfAlgosAppCall);
-        const txnGrp = atc.buildGroup();
-        const txn = txnGrp[0].txn;
-
-        const encodedTxn = algosdk.encodeUnsignedTransaction(txn);
-        const txnNameUint8Arr = new Uint8Array(Buffer.from(transactionId));
-
-        // Make app call to store transaction in boxes
-        const storeTxnAppCall = {
-            method: contract.getMethodByName("add_txn"),
-            methodArgs: [transactionId, encodedTxn],
-            boxes: [{ appIndex: 0, name: txnNameUint8Arr }],
-            ...commonParams,
-        };
-        const atc2 = new algosdk.AtomicTransactionComposer();
-        atc2.addMethodCall(storeTxnAppCall);
-        const result = await atc2.execute(algodClient, 4);
     };
 
     // Fetch wallet information e.g. name, balance, address
@@ -99,6 +65,7 @@ export default function Page({ params, searchParams }) {
             const appGlobalStateDecodedObject = await readGlobalState(
                 parseInt(appId)
             );
+            console.log(appGlobalStateDecodedObject);
             const txnsInfo = await Promise.all(
                 boxesResponse.boxes.map(async (box) => {
                     const boxResponse = await algodClient
@@ -107,11 +74,15 @@ export default function Page({ params, searchParams }) {
                     const boxValue = boxResponse.value;
                     console.log(boxValue);
                     let signaturesCount = 0;
+                    let signers = [];
                     boxValue
                         .slice(0, appGlobalStateDecodedObject.ownersCount)
-                        .forEach((value) => {
+                        .forEach((value, index) => {
                             if (value === 49) {
                                 signaturesCount += 1;
+                                signers.push(
+                                    appGlobalStateDecodedObject[index]
+                                );
                             }
                         });
 
@@ -125,6 +96,7 @@ export default function Page({ params, searchParams }) {
                         ).toString(),
                         txn: txnDecoded,
                         signatures: parseInt(signaturesCount),
+                        signers: signers,
                     };
                 })
             );
@@ -133,41 +105,84 @@ export default function Page({ params, searchParams }) {
         getBoxNames();
     }, [count, renderWallet]);
 
+    const firstFive = appAddr.substring(0, 5);
+    const lastFive = appAddr.substring(appAddr.length - 5);
+    const appAddrShort = `${firstFive}...${lastFive}`;
     return (
         <WalletContext.Provider value={{ handleWalletRender }}>
             {appInfo && (
-                <section>
-                    <div className="bg-white m-8 rounded-lg p-4">
-                        <div className="px-2 pt-2 text-lg font-bold">
+                <section className="lg:flex lg:justify-evenly md:flex md:justify-evenly">
+                    {isShowWalletInfoPopupOpen && (
+                        <WalletInfo
+                            setIsShowWalletInfoPopupOpen={
+                                setIsShowWalletInfoPopupOpen
+                            }
+                            isShowWalletInfoPopupOpen={
+                                isShowWalletInfoPopupOpen
+                            }
+                        />
+                    )}
+                    {isCreateTxnPopupOpen && (
+                        <AddTransaction
+                            isCreateTxnPopupOpen={isCreateTxnPopupOpen}
+                            setIsCreateTxnPopupOpen={setIsCreateTxnPopupOpen}
+                            appId={appId}
+                            handleWalletRender={handleWalletRender}
+                        />
+                    )}
+                    <div className="bg-white rounded-lg m-8 p-4 mx-auto max-w-xs text-center shadow-xl border-b-4 border-slate-700 lg:m-4 lg:min-h-[80vh] lg:max-h-[80vh] lg:flex lg:flex-col lg:justify-center lg:items-center lg:mt-12 lg:min-w-[20vw]">
+                        <div className="pt-2 text-xl font-bold">
                             {appInfo.name}
                         </div>
-                        <div className="px-2 text-xs">Wallet ID: {appId}</div>
-                        <div className="px-2 text-xs">
-                            Wallet Address: {appAddr}
+                        <div className="px-2 text-xs overflow-hidden text-ellipsis text-stone-500 flex items-center justify-center">
+                            {appAddrShort}
+                            <BiCopy
+                                onClick={() => {
+                                    navigator.clipboard.writeText(appAddr);
+                                }}
+                                className="hover:text-stone-800 cursor-pointer"
+                            />
                         </div>
-                        <div className="px-2 text-xs">
-                            Balance: {accInfo.amount}
+                        <div className="text-xs text-stone-500">
+                            ID: {appId}
+                        </div>
+                        <span className="text-xs text-stone-500 sm:mt-4">
+                            Balance:
+                        </span>
+                        <div className="text-4xl font-bold">
+                            {accInfo.amount / 1e6}
+                        </div>
+                        <span className="text-xs font-semibold">ALGOs</span>
+                        <div className="flex justify-evenly pt-4 sm:flex-col">
+                            <div className="flex flex-col">
+                                <div className="rounded-full sm:rounded-md sm:my-2 p-2.5 w-10 h-10 mx-auto bg-slate-800 text-white hover:scale-110">
+                                    <MdCallReceived className="text-xl" />
+                                </div>
+                                <label className="text-xs cursor-pointer">
+                                    Receive
+                                </label>
+                            </div>
+                            <div
+                                className={`flex flex-col ${
+                                    isCreateTxnPopupOpen
+                                        ? "hidden lg:block"
+                                        : ""
+                                }`}
+                            >
+                                <div
+                                    onClick={() => {
+                                        setIsCreateTxnPopupOpen(true);
+                                    }}
+                                    className="rounded-full sm:rounded-md sm:my-2 p-2.5 w-10 h-10 mx-auto bg-slate-800 text-white hover:scale-110"
+                                >
+                                    <BiSend className="text-xl" />
+                                </div>
+                                <label className="text-xs cursor-pointer">
+                                    Send
+                                </label>
+                            </div>
                         </div>
                     </div>
-                    <button
-                        onClick={() => {
-                            console.log(renderWallet);
-                        }}
-                    >
-                        Test
-                    </button>
-                    <button
-                        onClick={async () => {
-                            await handleSendAlgos(
-                                parseInt(appId),
-                                activeAddress,
-                                signer
-                            );
-                            setCount((prevCount) => prevCount + 1);
-                        }}
-                    >
-                        Send algos
-                    </button>
                     <Transactions txns={txns} appId={appId} appInfo={appInfo} />
                 </section>
             )}

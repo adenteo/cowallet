@@ -82,8 +82,10 @@ def send_algos(amount: abi.Uint64, boxName: abi.String, *, output: abi.String):
 @app.external
 def sign_txn(name: abi.String,*,output: abi.String):
     index = isOwner(Txn.sender())
+    status = App.box_extract(name.get(), index - Int(1), Int(1))
     return Seq([
         Assert(index),
+        Assert(status == Bytes("0")),
         App.box_replace(name.get(), index - Int(1), Bytes("1")),
         output.set(Concat(Txn.sender(), Bytes(" signed transaction "), name.get()))
     ])
@@ -91,9 +93,11 @@ def sign_txn(name: abi.String,*,output: abi.String):
 
 @app.external
 def add_txn(name: abi.String, txn: abi.String,*,output: abi.String):
+    index = isOwner(Txn.sender())
     return Seq([
-        Assert(isOwner(Txn.sender())),
-        App.box_put(name.get(), Concat(Substring(Bytes("1000000000"), Int(0), app.state.ownersCount.get()), txn.get())),
+        Assert(index),
+        App.box_put(name.get(), Concat(Substring(Bytes("0000000000"), Int(0), app.state.ownersCount.get()), txn.get())),
+        App.box_replace(name.get(), index - Int(1), Bytes("1")), # Set txn creator's signing status to signed.
         output.set("Added txn to box storage")
     ])
 

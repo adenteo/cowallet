@@ -30,9 +30,9 @@ export default function CreateWallet() {
         }
     });
     const [owners, setOwners] = useState([]);
-    const [isPopupOpen, setIsPopupOpen] = useState(false);
+    const [isAddOwnersPopupOpen, setIsAddOwnersPopupOpen] = useState(false);
 
-    const handleAddOwner = (address) => {
+    const onAddOwner = (address) => {
         setOwners([...owners, address]);
     };
 
@@ -85,11 +85,11 @@ export default function CreateWallet() {
 
     return (
         <div className="flex flex-col items-center justify-center h-[94vh] max-h-[94vh]">
-            {isPopupOpen && (
+            {isAddOwnersPopupOpen && (
                 <AddOwnerPopup
                     owners={owners}
-                    onAddOwner={handleAddOwner}
-                    setIsPopupOpen={setIsPopupOpen}
+                    onAddOwner={onAddOwner}
+                    setIsAddOwnersPopupOpen={setIsAddOwnersPopupOpen}
                 />
             )}
             <div className="bg-white p-10 rounded-lg max-h-[88vh]">
@@ -109,7 +109,7 @@ export default function CreateWallet() {
                 <div className="my-3">
                     <form
                         onSubmit={handleSubmit}
-                        className="mx-auto max-w-xs lg:max-w-sm"
+                        className="mx-auto w-xs lg:w-sm"
                     >
                         <div className="text-center my-3">Name of wallet</div>
                         <input
@@ -152,18 +152,18 @@ export default function CreateWallet() {
                         <br />
                         <div className="text-center my-3">Owners</div>
                         <div
-                            onClick={() => setIsPopupOpen(true)}
-                            className="rounded bg-green-500 px-4 py-2 text-base text-white hover:bg-green-700"
+                            onClick={() => setIsAddOwnersPopupOpen(true)}
+                            className="rounded bg-green-500 px-4 py-2 text-base text-white hover:bg-green-600"
                         >
                             Add owners (Max: 10)
                         </div>
                         <div className="text-center text-xs mt-1">
                             {owners.length} / 10
                         </div>
-                        <div className="mt-4 flex justify-center">
+                        <div className="mt-4 w-full">
                             <button
                                 type="submit"
-                                className="rounded bg-slate-800 px-4 py-2 text-base text-white hover:bg-slate-700"
+                                className="rounded bg-slate-800 w-full px-4 py-2 text-base text-white hover:bg-slate-700 hover:scale-105"
                             >
                                 Create Wallet
                             </button>
