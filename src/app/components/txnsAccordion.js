@@ -41,7 +41,7 @@ function Icon({ id, open }) {
     );
 }
 
-export default function TxnsAccordion({ txns, appId, appInfo }) {
+export default function TxnsAccordion({ txns, appId, appInfo, owners }) {
     const { handleWalletRender } = useContext(WalletContext);
     const [open, setOpen] = useState(0);
     const [signTxnSuccessAlertOpen, setSignTxnSuccessAlertOpen] =
@@ -58,10 +58,12 @@ export default function TxnsAccordion({ txns, appId, appInfo }) {
         setOpen(open === value ? 0 : value);
     };
 
+    const isOwner = owners.includes(activeAddress);
+    console.log(owners);
+    console.log(isOwner);
     const handleExecution = async (txn, name) => {
         const atc = new algosdk.AtomicTransactionComposer();
         atc.addTransaction({ txn, signer });
-        // const result = await atc.execute(algodClient, 4);
         const suggestedParams = await algodClient.getTransactionParams().do();
         const commonParams = {
             appID: parseInt(appId),
@@ -183,37 +185,39 @@ export default function TxnsAccordion({ txns, appId, appInfo }) {
                                 {txn.txn.lastRound}
                             </span>
                         </div>
-                        <div>
-                            {txn.signatures >= appInfo.threshold ? (
-                                <button
-                                    onClick={async () => {
-                                        await handleExecution(
-                                            txn.txn,
-                                            txn.name
-                                        );
-                                    }}
-                                    className="bg-green-600 p-3 rounded-md text-white mt-2"
-                                >
-                                    Execute Transaction
-                                </button>
-                            ) : txn.signers.includes(activeAddress) ? (
-                                <button
-                                    disabled
-                                    className="bg-slate-500 p-3 rounded-md text-white mt-2"
-                                >
-                                    Transaction signed
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={async () => {
-                                        await handleSignTxn(txn.name);
-                                    }}
-                                    className="bg-slate-800 p-3 rounded-md text-white mt-2 hover:scale-105"
-                                >
-                                    Sign Transaction
-                                </button>
-                            )}
-                        </div>
+                        {isOwner && (
+                            <div>
+                                {txn.signatures >= appInfo.threshold ? (
+                                    <button
+                                        onClick={async () => {
+                                            await handleExecution(
+                                                txn.txn,
+                                                txn.name
+                                            );
+                                        }}
+                                        className="bg-green-600 p-3 rounded-md text-white mt-2"
+                                    >
+                                        Execute Transaction
+                                    </button>
+                                ) : txn.signers.includes(activeAddress) ? (
+                                    <button
+                                        disabled
+                                        className="bg-slate-500 p-3 rounded-md text-white mt-2"
+                                    >
+                                        Transaction signed
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={async () => {
+                                            await handleSignTxn(txn.name);
+                                        }}
+                                        className="bg-slate-800 p-3 rounded-md text-white mt-2 hover:scale-105"
+                                    >
+                                        Sign Transaction
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </AccordionBody>
                 </Accordion>
             ))}

@@ -21,10 +21,13 @@ export default function AddTransaction({
     isCreateTxnPopupOpen,
     setIsCreateTxnPopupOpen,
     appId,
+    appAddr,
     handleWalletRender,
 }) {
     const [selectedTxnOption, setSelectedTxnOption] = useState("ALGO");
     const [receiver, setReceiver] = useState("");
+    const [receiverMsg, setReceiverMsg] = useState("");
+    const [receiverError, setReceiverError] = useState(false);
     const [amount, setAmount] = useState(0);
     const [openPopover, setOpenPopover] = useState(false);
     const [step, setStep] = useState("Details");
@@ -109,7 +112,20 @@ export default function AddTransaction({
                     <li className="flex items-center">Confirmation</li>
                 </ol>
                 <form
-                    onSubmit={() => {
+                    onSubmit={async (e) => {
+                        e.preventDefault();
+                        if (receiver == appAddr) {
+                            setReceiverMsg("Cannot set wallet as receiver.");
+                            setReceiverError(true);
+                            return;
+                        }
+                        try {
+                            await algodClient.accountInformation(receiver).do();
+                        } catch (err) {
+                            setReceiverMsg("Account does not exist.");
+                            setReceiverError(true);
+                            return;
+                        }
                         setStep("Confirmation");
                     }}
                 >
@@ -174,12 +190,18 @@ export default function AddTransaction({
                         id="receiver"
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-slate-800 focus:border-state-800 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         placeholder="Public address"
+                        minLength={58}
                         maxLength={58}
                         onChange={(e) => {
                             setReceiver(e.target.value);
                         }}
                         required
                     ></input>
+                    {receiverError && (
+                        <div className="text-xs text-red-500 mt-1">
+                            {receiverMsg}
+                        </div>
+                    )}
                     <button
                         className="mt-6 px-4 py-2 text-white bg-slate-800 rounded w-full text-center"
                         type="submit"

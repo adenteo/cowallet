@@ -8,7 +8,8 @@ import Transactions from "../../components/transactions";
 import WalletContext from "@/app/components/walletContext";
 import { MdCallReceived } from "react-icons/md";
 import { BiSend, BiCopy } from "react-icons/bi";
-import AddTransaction from "@/app/components/addTransaction";
+import AddTransaction from "@/app/components/sendTransaction";
+import ReceiveTransaction from "@/app/components/receiveTransaction";
 import WalletInfo from "@/app/components/walletInfo";
 
 const algodClient = getAlgodClient(process.env.NEXT_PUBLIC_NETWORK);
@@ -29,6 +30,8 @@ export default function Page({ params, searchParams }) {
     const [count, setCount] = useState(0);
     const [renderWallet, setRenderWallet] = useState(false);
     const [isCreateTxnPopupOpen, setIsCreateTxnPopupOpen] = useState(false);
+    const [isReceiveTxnPopupOpen, setIsReceiveTxnPopupOpen] = useState(false);
+    const [owners, setOwners] = useState([]);
     const [isShowWalletInfoPopupOpen, setIsShowWalletInfoPopupOpen] =
         useState(false);
     const [accInfo, setAccInfo] = useState(null);
@@ -50,6 +53,12 @@ export default function Page({ params, searchParams }) {
             const appGlobalStateDecodedObject = await readGlobalState(
                 parseInt(appId)
             );
+            for (let i = 0; i < appGlobalStateDecodedObject.ownersCount; i++) {
+                setOwners((prevOwners) => [
+                    ...prevOwners,
+                    appGlobalStateDecodedObject[i],
+                ]);
+            }
             setAccInfo(info);
             setAppInfo(appGlobalStateDecodedObject);
         };
@@ -122,11 +131,18 @@ export default function Page({ params, searchParams }) {
                             }
                         />
                     )}
+                    {isReceiveTxnPopupOpen && (
+                        <ReceiveTransaction
+                            receiver={appAddr}
+                            setIsReceiveTxnPopupOpen={setIsReceiveTxnPopupOpen}
+                        />
+                    )}
                     {isCreateTxnPopupOpen && (
                         <AddTransaction
                             isCreateTxnPopupOpen={isCreateTxnPopupOpen}
                             setIsCreateTxnPopupOpen={setIsCreateTxnPopupOpen}
                             appId={appId}
+                            appAddr={appAddr}
                             handleWalletRender={handleWalletRender}
                         />
                     )}
@@ -153,8 +169,21 @@ export default function Page({ params, searchParams }) {
                             {accInfo.amount / 1e6}
                         </div>
                         <span className="text-xs font-semibold">ALGOs</span>
-                        <div className="flex justify-evenly pt-4 sm:flex-col">
-                            <div className="flex flex-col">
+                        <div
+                            className={`flex justify-evenly pt-4 sm:flex-col ${
+                                !owners.includes(activeAddress) && "hidden"
+                            }`}
+                        >
+                            <div
+                                className={`flex flex-col ${
+                                    isReceiveTxnPopupOpen
+                                        ? "hidden lg:block"
+                                        : ""
+                                }`}
+                                onClick={() => {
+                                    setIsReceiveTxnPopupOpen(true);
+                                }}
+                            >
                                 <div className="rounded-full sm:rounded-md sm:my-2 p-2.5 w-10 h-10 mx-auto bg-slate-800 text-white hover:scale-110">
                                     <MdCallReceived className="text-xl" />
                                 </div>
@@ -183,7 +212,12 @@ export default function Page({ params, searchParams }) {
                             </div>
                         </div>
                     </div>
-                    <Transactions txns={txns} appId={appId} appInfo={appInfo} />
+                    <Transactions
+                        txns={txns}
+                        appId={appId}
+                        appInfo={appInfo}
+                        owners={owners}
+                    />
                 </section>
             )}
         </WalletContext.Provider>

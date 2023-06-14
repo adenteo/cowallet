@@ -30,6 +30,12 @@ class ScwState:
         default=Int(0),
         descr="Number of owners in smart contract wallet"
     )
+    name = LocalStateValue(
+        stack_type=TealType.bytes,
+        key=Bytes("hello"),
+        default=Bytes("Opted in")
+    )
+    
     
 
 

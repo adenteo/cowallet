@@ -1,6 +1,6 @@
 #pragma version 8
 intcblock 0 1
-bytecblock 0x 0x6f776e657273436f756e74 0x151f7c75 0x7468726573686f6c64 0x31 0x6e616d65 0x76657273696f6e
+bytecblock 0x 0x6f776e657273436f756e74 0x151f7c75 0x7468726573686f6c64 0x31 0x76657273696f6e 0x68656c6c6f
 txn NumAppArgs
 intc_0 // 0
 ==
@@ -129,23 +129,21 @@ retsub
 create_1:
 proto 3 1
 bytec_0 // ""
-bytec 5 // "name"
-bytec_0 // ""
-app_global_put
 bytec_1 // "ownersCount"
 intc_0 // 0
 app_global_put
 bytec_3 // "threshold"
 intc_0 // 0
 app_global_put
-bytec 6 // "version"
+bytec 5 // "version"
 intc_0 // 0
 app_global_put
-bytec 5 // "name"
+txn Sender
+bytec 6 // "hello"
 frame_dig -3
 extract 2 0
-app_global_put
-bytec 6 // "version"
+app_local_put
+bytec 5 // "version"
 frame_dig -2
 app_global_put
 bytec_3 // "threshold"
@@ -191,6 +189,10 @@ proto 0 0
 txn Sender
 callsub isOwner_8
 assert
+txn Sender
+bytec 6 // "hello"
+pushbytes 0x4f7074656420696e // "Opted in"
+app_local_put
 retsub
 
 // send_algos

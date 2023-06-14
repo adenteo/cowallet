@@ -1,9 +1,33 @@
 "use client";
 import { BiWallet } from "react-icons/bi";
-import { useWallet } from "@txnlab/use-wallet";
 import { useRouter } from "next/navigation";
+import { getNetworkCredentials } from "../../clients";
+import {
+    reconnectProviders,
+    initializeProviders,
+    PROVIDER_ID,
+    useWallet,
+} from "@txnlab/use-wallet";
 
-export default function MainMenu({
+const network = process.env.NEXT_PUBLIC_NETWORK || "SandNet";
+const cred = getNetworkCredentials(network);
+
+const walletProviders = initializeProviders(
+    [
+        PROVIDER_ID.WALLETCONNECT,
+        PROVIDER_ID.PERA,
+        PROVIDER_ID.DEFLY,
+        PROVIDER_ID.KMD,
+    ],
+    {
+        network: network.toLowerCase(), //betanet, testnet, mainnet, sandnet
+        nodeServer: cred.algod.address || "",
+        nodeToken: cred.algod.token || "",
+        nodePort: cred.algod.port || "",
+    }
+);
+
+export default async function MainMenu({
     showProviders,
     setShowProviders,
     setCurrentStep,
@@ -16,7 +40,6 @@ export default function MainMenu({
     };
 
     const createWallet = () => {
-        console.log("Creating wallet");
         router.push("/create");
     };
     return (
@@ -26,7 +49,7 @@ export default function MainMenu({
                     CoWallet
                     <BiWallet className="mx-auto text-4xl" />
                 </h1>
-                {isActive ? (
+                {isReady && isActive ? (
                     <div>
                         <div
                             onClick={createWallet}
@@ -34,7 +57,12 @@ export default function MainMenu({
                         >
                             Create CoWallet
                         </div>
-                        <div className="bg-slate-800 p-5 rounded-xl my-4 font-semibold text-white hover:bg-slate-600 hover:scale-105">
+                        <div
+                            onClick={() => {
+                                setCurrentStep({ loadWallet: 1 });
+                            }}
+                            className="bg-slate-800 p-5 rounded-xl my-4 font-semibold text-white hover:bg-slate-600 hover:scale-105"
+                        >
                             Load CoWallet
                         </div>
                     </div>
