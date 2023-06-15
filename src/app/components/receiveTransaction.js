@@ -19,6 +19,10 @@ export default function ReceiveTransaction({
                     Scan the QR code below to send ALGOs and assets to your
                     CoWallet.
                 </div>
+                <div className="text-xs my-2 text-slate-800">
+                    To receive ASA, please make sure to opt in by sending an
+                    opt-in transaction.
+                </div>
                 <div className="flex justify-center items-center p-2 text-ellipsis">
                     <QRCode size={300} value={receiver} />
                 </div>

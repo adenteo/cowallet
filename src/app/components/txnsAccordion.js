@@ -9,11 +9,15 @@ import {
     Alert,
     Button,
     Typography,
+    Popover,
+    PopoverHandler,
+    PopoverContent,
 } from "@material-tailwind/react";
 import algosdk, { decodeUint64 } from "algosdk";
 import { useWallet } from "@txnlab/use-wallet";
 import { getAlgodClient } from "../../clients";
 import WalletContext from "./walletContext";
+import { createOptInTxn } from "../../useractions/createOptInTxn";
 
 const contractData = require("../../../artifacts/SmartContractWallet/contract.json");
 const contract = new algosdk.ABIContract(contractData);
@@ -59,8 +63,16 @@ export default function TxnsAccordion({ txns, appId, appInfo, owners }) {
     };
 
     const isOwner = owners.includes(activeAddress);
-    console.log(owners);
-    console.log(isOwner);
+    console.log(txns);
+
+    /**
+     * Handles the submitting of transaction to network.
+     * Opt-in transaction is added to ATC if activeAddress is not already opted in.
+     *
+     * @param {any} txn The transaction to be executed
+     * @param {any} name The box name of the transaction
+     * @returns {any} Returns null if execution of submitting transaction fails
+     */
     const handleExecution = async (txn, name) => {
         const atc = new algosdk.AtomicTransactionComposer();
         atc.addTransaction({ txn, signer });
@@ -78,6 +90,11 @@ export default function TxnsAccordion({ txns, appId, appInfo, owners }) {
             ...commonParams,
         };
         atc.addMethodCall(removeTxnAppCall);
+        const optInTxn = await createOptInTxn(activeAddress, parseInt(appId));
+        if (optInTxn) {
+            console.log("Adding Opt-in txn.");
+            atc.addTransaction({ txn: optInTxn, signer });
+        }
         try {
             const result = await atc.execute(algodClient, 4);
         } catch (err) {
@@ -89,9 +106,15 @@ export default function TxnsAccordion({ txns, appId, appInfo, owners }) {
         handleWalletRender(); //Re-render wallet info
     };
 
+    /**
+     * Handles the signing of transaction.
+     * Opt-in transaction is added to ATC if activeAddress is not already opted in.
+     *
+     * @param {any} name Box name of transaction to be signed
+     * @returns {any} Returns null if execution of signing transaction fails
+     */
     const handleSignTxn = async (name) => {
         const atc = new algosdk.AtomicTransactionComposer();
-        // const result = await atc.execute(algodClient, 4);
         const suggestedParams = await algodClient.getTransactionParams().do();
         const commonParams = {
             appID: parseInt(appId),
@@ -106,6 +129,11 @@ export default function TxnsAccordion({ txns, appId, appInfo, owners }) {
             ...commonParams,
         };
         atc.addMethodCall(signTxnAppCall);
+        const optInTxn = await createOptInTxn(activeAddress, parseInt(appId));
+        if (optInTxn) {
+            console.log("Adding Opt-in txn.");
+            atc.addTransaction({ txn: optInTxn, signer });
+        }
         try {
             const result = await atc.execute(algodClient, 4);
             setSignTxnSuccessAlertOpen(true);
@@ -130,7 +158,7 @@ export default function TxnsAccordion({ txns, appId, appInfo, owners }) {
                         onClick={() => handleOpen(index + 1)}
                         className="text-xs justify-evenly font-bold"
                     >
-                        <div>{txn.txn.name}</div>
+                        <div>{txn.txnType}</div>
                         <div>
                             Signatures: {txn.signatures} of {appInfo.threshold}{" "}
                         </div>
@@ -150,20 +178,48 @@ export default function TxnsAccordion({ txns, appId, appInfo, owners }) {
                                 {algosdk.encodeAddress(txn.txn.from.publicKey)}
                             </span>
                         </div>
-                        <div className="flex">
-                            <label className="font-semibold">Receiver:</label>
-                            <span className="overflow-hidden text-ellipsis ml-1">
-                                {algosdk.encodeAddress(
-                                    txn.txn.appAccounts[0].publicKey
+                        {txn.txnType !== "OPT-IN" && (
+                            <div className="flex">
+                                <label className="font-semibold">
+                                    Receiver:
+                                </label>
+                                <span className="overflow-hidden text-ellipsis ml-1">
+                                    {algosdk.encodeAddress(
+                                        txn.txn.appAccounts[0].publicKey
+                                    )}
+                                </span>
+                            </div>
+                        )}
+                        {txn.txnType === "ALGO" ? (
+                            <div className="flex">
+                                <label className="font-semibold">Amount:</label>
+                                <span className="overflow-hidden text-ellipsis ml-1">
+                                    {decodeUint64(txn.txn.appArgs[1]) / 1e6}{" "}
+                                    ALGOs
+                                </span>
+                            </div>
+                        ) : (
+                            <div>
+                                {txn.txnType === "ASA" && (
+                                    <div className="flex">
+                                        <label className="font-semibold">
+                                            Amount:
+                                        </label>
+                                        <span className="overflow-hidden text-ellipsis ml-1">
+                                            {decodeUint64(txn.txn.appArgs[1])}
+                                        </span>
+                                    </div>
                                 )}
-                            </span>
-                        </div>
-                        <div className="flex">
-                            <label className="font-semibold">Amount:</label>
-                            <span className="overflow-hidden text-ellipsis ml-1">
-                                {decodeUint64(txn.txn.appArgs[1]) / 1e6} ALGOs
-                            </span>
-                        </div>
+                                <div className="flex">
+                                    <label className="font-semibold">
+                                        Asset:
+                                    </label>
+                                    <span className="overflow-hidden text-ellipsis ml-1">
+                                        {txn.txn.appForeignAssets.toString()}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
                         <div className="flex">
                             <label className="font-semibold">Fee:</label>
                             <span className="overflow-hidden text-ellipsis ml-1">
@@ -185,39 +241,65 @@ export default function TxnsAccordion({ txns, appId, appInfo, owners }) {
                                 {txn.txn.lastRound}
                             </span>
                         </div>
-                        {isOwner && (
-                            <div>
-                                {txn.signatures >= appInfo.threshold ? (
-                                    <button
-                                        onClick={async () => {
-                                            await handleExecution(
-                                                txn.txn,
-                                                txn.name
-                                            );
-                                        }}
-                                        className="bg-green-600 p-3 rounded-md text-white mt-2"
-                                    >
-                                        Execute Transaction
-                                    </button>
-                                ) : txn.signers.includes(activeAddress) ? (
-                                    <button
-                                        disabled
-                                        className="bg-slate-500 p-3 rounded-md text-white mt-2"
-                                    >
-                                        Transaction signed
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={async () => {
-                                            await handleSignTxn(txn.name);
-                                        }}
-                                        className="bg-slate-800 p-3 rounded-md text-white mt-2 hover:scale-105"
-                                    >
-                                        Sign Transaction
-                                    </button>
-                                )}
-                            </div>
-                        )}
+                        <div className="flex">
+                            {isOwner && (
+                                <div>
+                                    {txn.signatures >= appInfo.threshold ? (
+                                        <button
+                                            onClick={async () => {
+                                                await handleExecution(
+                                                    txn.txn,
+                                                    txn.name
+                                                );
+                                            }}
+                                            className="bg-green-600 p-3 rounded-md text-white mt-2"
+                                        >
+                                            Execute Transaction
+                                        </button>
+                                    ) : txn.signers.includes(activeAddress) ? (
+                                        <button
+                                            disabled
+                                            className="bg-slate-500 p-3 rounded-md text-white mt-2"
+                                        >
+                                            Transaction signed
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={async () => {
+                                                await handleSignTxn(txn.name);
+                                            }}
+                                            className="bg-slate-800 p-3 rounded-md text-white mt-2 hover:scale-105"
+                                        >
+                                            Sign Transaction
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                            <Popover
+                                animate={{
+                                    mount: { scale: 1, y: 0 },
+                                    unmount: { scale: 0, y: 25 },
+                                }}
+                            >
+                                <PopoverHandler>
+                                    <Button className="bg-slate-800 mt-2 rounded-md p-3 font-normal ml-3 block">
+                                        View Signatures
+                                    </Button>
+                                </PopoverHandler>
+                                <PopoverContent className="bg-slate-800 border-none">
+                                    {txn.signers.map((owner, index) => (
+                                        <div
+                                            className="text-xs text-white"
+                                            key={index}
+                                        >
+                                            {owner.substring(0, 10)}
+                                            {"..."}
+                                            {owner.substring(owner.length - 10)}
+                                        </div>
+                                    ))}
+                                </PopoverContent>
+                            </Popover>
+                        </div>
                     </AccordionBody>
                 </Accordion>
             ))}
@@ -233,7 +315,7 @@ export default function TxnsAccordion({ txns, appId, appInfo, owners }) {
                         variant="text"
                         color="white"
                         size="sm"
-                        className="!absolute top-3 right-3"
+                        className="!absolute top-10 right-3 lg:top-3"
                         onClick={() => setSignTxnFailureAlertOpen(false)}
                     >
                         Close
@@ -253,7 +335,7 @@ export default function TxnsAccordion({ txns, appId, appInfo, owners }) {
                         variant="text"
                         color="white"
                         size="sm"
-                        className="!absolute top-3 right-3"
+                        className="!absolute top-10 right-3 lg:top-3"
                         onClick={() => setExecuteTxnFailureAlertOpen(false)}
                     >
                         Close
@@ -272,7 +354,7 @@ export default function TxnsAccordion({ txns, appId, appInfo, owners }) {
                         variant="text"
                         color="white"
                         size="sm"
-                        className="!absolute top-3 right-3"
+                        className="!absolute top-10 right-3 lg:top-3"
                         onClick={() => setSignTxnSuccessAlertOpen(false)}
                     >
                         Close
@@ -296,7 +378,7 @@ export default function TxnsAccordion({ txns, appId, appInfo, owners }) {
                         variant="text"
                         color="white"
                         size="sm"
-                        className="!absolute top-3 right-3"
+                        className="!absolute top-10 right-3 lg:top-3"
                         onClick={() => setExecuteTxnSuccessAlertOpen(false)}
                     >
                         Close

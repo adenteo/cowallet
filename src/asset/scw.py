@@ -30,11 +30,6 @@ class ScwState:
         default=Int(0),
         descr="Number of owners in smart contract wallet"
     )
-    name = LocalStateValue(
-        stack_type=TealType.bytes,
-        key=Bytes("hello"),
-        default=Bytes("Opted in")
-    )
     
     
 
@@ -66,6 +61,23 @@ def opt_in():
         Assert(isOwner(Txn.sender())), 
         app.initialize_local_state())
 
+@app.external
+def opt_in_ASA(boxName: abi.String,*, output: abi.String):
+    return Seq(
+        Assert(isOwner(Txn.sender())),
+        Assert(hasMetSignaturesThreshold(boxName.get())),
+        InnerTxnBuilder.Begin(),
+        InnerTxnBuilder.SetFields(
+            {
+                TxnField.type_enum: TxnType.AssetTransfer,
+                TxnField.asset_amount: Int(0),
+                TxnField.asset_receiver: Global.current_application_address(),
+                TxnField.xfer_asset: Txn.assets[0],
+            }
+        ),
+        InnerTxnBuilder.Submit(),
+        output.set("Opted into asset!")
+    )
 
 
 @app.external
@@ -86,6 +98,25 @@ def send_algos(amount: abi.Uint64, boxName: abi.String, *, output: abi.String):
     )
 
 @app.external
+def send_ASA(amount: abi.Uint64, boxName: abi.String, *, output: abi.String):
+    return Seq(
+        Assert(isOwner(Txn.sender())),
+        Assert(hasMetSignaturesThreshold(boxName.get())),
+        InnerTxnBuilder.Begin(),
+          InnerTxnBuilder.SetFields(
+            {
+                TxnField.type_enum: TxnType.AssetTransfer,
+                TxnField.asset_amount: amount.get(),
+                TxnField.asset_receiver: Txn.accounts[1],
+                TxnField.xfer_asset: Txn.assets[0],
+            }
+        ),
+        InnerTxnBuilder.Submit(),
+        output.set("Submitted ASA transfer txn.")
+    )
+
+
+@app.external
 def sign_txn(name: abi.String,*,output: abi.String):
     index = isOwner(Txn.sender())
     status = App.box_extract(name.get(), index - Int(1), Int(1))
@@ -98,11 +129,11 @@ def sign_txn(name: abi.String,*,output: abi.String):
 
 
 @app.external
-def add_txn(name: abi.String, txn: abi.String,*,output: abi.String):
+def add_txn(name: abi.String, txn: abi.String, txnType: abi.String,*,output: abi.String):
     index = isOwner(Txn.sender())
     return Seq([
         Assert(index),
-        App.box_put(name.get(), Concat(Substring(Bytes("0000000000"), Int(0), app.state.ownersCount.get()), txn.get())),
+        App.box_put(name.get(), Concat(Substring(Bytes("0000000000"), Int(0), app.state.ownersCount.get()), txnType.get(), txn.get())),
         App.box_replace(name.get(), index - Int(1), Bytes("1")), # Set txn creator's signing status to signed.
         output.set("Added txn to box storage")
     ])

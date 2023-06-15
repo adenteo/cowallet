@@ -25,7 +25,7 @@ const createScwTxn = async (
     const numGlobalInts = 3;
     const numGlobalByteSlices = owners.length + 1;
     const numLocalInts = 0;
-    const numLocalByteSlices = 0;
+    const numLocalByteSlices = 1;
     const createMethodSelector = algosdk
         .getMethodByName(contract.methods, "create")
         .getSelector();

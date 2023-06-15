@@ -12,7 +12,7 @@ export default function Transactions({ txns, appId, appInfo, owners }) {
         </div>
     ) : (
         <div className="bg-white mt-10 m-8 rounded-md min-h-[50vh] max-h-[50vh] lg:min-h-[80vh] lg:max-h-[80vh] lg:mt-12 lg:min-w-[60vw] border-b-4 border-slate-800 flex items-center justify-center">
-            <span>You have no pending transactions</span>
+            <span>You have no pending transactions.</span>
         </div>
     );
 }

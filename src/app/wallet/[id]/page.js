@@ -11,8 +11,11 @@ import { BiSend, BiCopy } from "react-icons/bi";
 import AddTransaction from "@/app/components/sendTransaction";
 import ReceiveTransaction from "@/app/components/receiveTransaction";
 import WalletInfo from "@/app/components/walletInfo";
+import { Select, Option } from "@material-tailwind/react";
 
 const algodClient = getAlgodClient(process.env.NEXT_PUBLIC_NETWORK);
+const contractData = require("../../../../artifacts/SmartContractWallet/contract.json");
+const contract = new algosdk.ABIContract(contractData);
 
 export default function Page({ params, searchParams }) {
     const {
@@ -75,13 +78,13 @@ export default function Page({ params, searchParams }) {
                 parseInt(appId)
             );
             console.log(appGlobalStateDecodedObject);
+            console.log(boxesResponse);
             const txnsInfo = await Promise.all(
                 boxesResponse.boxes.map(async (box) => {
                     const boxResponse = await algodClient
                         .getApplicationBoxByName(parseInt(appId), box.name)
                         .do();
                     const boxValue = boxResponse.value;
-                    console.log(boxValue);
                     let signaturesCount = 0;
                     let signers = [];
                     boxValue
@@ -96,14 +99,30 @@ export default function Page({ params, searchParams }) {
                         });
 
                     const txnDecoded = algosdk.decodeUnsignedTransaction(
-                        boxValue.slice(appGlobalStateDecodedObject.ownersCount)
+                        boxValue.slice(
+                            appGlobalStateDecodedObject.ownersCount + 1
+                        )
                     );
+                    let txnType = boxValue
+                        .slice(
+                            appGlobalStateDecodedObject.ownersCount,
+                            appGlobalStateDecodedObject.ownersCount + 1
+                        )
+                        .toString();
+                    if (txnType === "48") {
+                        txnType = "ALGO";
+                    } else if (txnType === "49") {
+                        txnType = "ASA";
+                    } else {
+                        txnType = "OPT-IN";
+                    }
                     return {
                         name: Buffer.from(
                             boxResponse.name,
                             "base64"
                         ).toString(),
                         txn: txnDecoded,
+                        txnType: txnType,
                         signatures: parseInt(signaturesCount),
                         signers: signers,
                     };
@@ -143,10 +162,20 @@ export default function Page({ params, searchParams }) {
                             setIsCreateTxnPopupOpen={setIsCreateTxnPopupOpen}
                             appId={appId}
                             appAddr={appAddr}
+                            accInfo={accInfo}
                             handleWalletRender={handleWalletRender}
                         />
                     )}
                     <div className="bg-white rounded-lg m-8 p-4 mx-auto max-w-xs text-center shadow-xl border-b-4 border-slate-700 lg:m-4 lg:min-h-[80vh] lg:max-h-[80vh] lg:flex lg:flex-col lg:justify-center lg:items-center lg:mt-12 lg:min-w-[20vw]">
+                        {owners.includes(activeAddress) ? (
+                            <div className="text-white bg-green-500 p-1 rounded-full lg:px-4">
+                                Owner
+                            </div>
+                        ) : (
+                            <div className="bg-red-500 text-white p-1 rounded-full lg:px-4">
+                                Not owner
+                            </div>
+                        )}
                         <div className="pt-2 text-xl font-bold">
                             {appInfo.name}
                         </div>

@@ -38,7 +38,35 @@
             }
         },
         {
+            "name": "opt_in_ASA",
+            "args": [
+                {
+                    "type": "string",
+                    "name": "boxName"
+                }
+            ],
+            "returns": {
+                "type": "string"
+            }
+        },
+        {
             "name": "send_algos",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "amount"
+                },
+                {
+                    "type": "string",
+                    "name": "boxName"
+                }
+            ],
+            "returns": {
+                "type": "string"
+            }
+        },
+        {
+            "name": "send_ASA",
             "args": [
                 {
                     "type": "uint64",
@@ -75,6 +103,10 @@
                 {
                     "type": "string",
                     "name": "txn"
+                },
+                {
+                    "type": "string",
+                    "name": "txnType"
                 }
             ],
             "returns": {

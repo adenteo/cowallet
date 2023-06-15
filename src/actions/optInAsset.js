@@ -11,14 +11,15 @@ const algodClient = getAlgodClient(process.env.NEXT_PUBLIC_NETWORK);
 (async () => {
     const suggestedParams = await algodClient.getTransactionParams().do();
 
-    const paymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+    const optInTxn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
         from: creator.addr,
-        to: "L5FE66M2UHHD6HC7YB3GHS5GBTCJGMBRZPNFMLSPVM2WYSTAMLWXRVTOSU",
-        amount: 1000000,
+        to: creator.addr,
         suggestedParams,
+        assetIndex: 9527,
+        amount: 0,
     });
 
-    const signedTxn = paymentTxn.signTxn(creator.sk);
+    const signedTxn = optInTxn.signTxn(creator.sk);
     // const { txn } = algosdk.decodeSignedTransaction(signedTxn);
     let tx = await algodClient.sendRawTransaction(signedTxn).do();
     console.log("Transaction : " + tx.txId);

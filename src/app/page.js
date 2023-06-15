@@ -31,10 +31,6 @@ const walletProviders = initializeProviders(
     }
 );
 
-const reconnect = async () => {
-    await reconnectProviders(walletProviders);
-};
-
 export default async function Home() {
     const { providers, isReady, isActive, activeAddress } = useWallet();
     const [showProviders, setShowProviders] = useState(false);
@@ -45,7 +41,7 @@ export default async function Home() {
      * 3. loadWallet
      */
     const [currentStep, setCurrentStep] = useState({ mainMenu: 1 });
-    const wait = await reconnect();
+
     return (
         <main>
             {Object.keys(currentStep)[0] === "mainMenu" && (
