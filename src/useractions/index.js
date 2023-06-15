@@ -30,6 +30,14 @@ const createScwTxn = async (
         .getMethodByName(contract.methods, "create")
         .getSelector();
 
+    let mergedOwners = new Uint8Array(32 * owners.length);
+    let offset = 0;
+    owners.forEach((owner) => {
+        const ownerUint8 = algosdk.decodeAddress(owner);
+        mergedOwners.set(ownerUint8.publicKey, offset);
+        offset += 32;
+    });
+
     const appCreateTxn = algosdk.makeApplicationCreateTxnFromObject({
         from: activeAddress,
         approvalProgram,
@@ -44,8 +52,9 @@ const createScwTxn = async (
             new algosdk.ABIStringType().encode(name),
             new algosdk.ABIByteType().encode(parseInt(version)),
             new algosdk.ABIByteType().encode(parseInt(threshold)),
+            new algosdk.ABIByteType().encode(parseInt(owners.length)),
         ],
-        accounts: owners,
+        note: mergedOwners,
     });
     const decodedAppCreateTxn = algosdk.encodeUnsignedTransaction(appCreateTxn);
     return decodedAppCreateTxn;

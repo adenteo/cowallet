@@ -19,6 +19,11 @@ const AddOwnerPopup = ({ onAddOwner, owners, setIsAddOwnersPopupOpen }) => {
                 setError(true);
                 return;
             }
+            if (owners.length >= 10) {
+                setErrorMsg("Max number of owners added.");
+                setError(true);
+                return;
+            }
             if (owners.includes(address)) {
                 setErrorMsg("Account already added as owner.");
                 setError(true);

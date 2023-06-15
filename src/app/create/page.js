@@ -90,7 +90,6 @@ export default function CreateWallet() {
             const appAddr = algosdk.getApplicationAddress(parseInt(appId));
             // Fund wallet with algos
             await fundWallet(appAddr);
-            await addOwners(algodClient, activeAddress, signer, owners, appId);
             router.push("/wallet/" + appId);
         } catch (error) {
             console.error("Error:", error);

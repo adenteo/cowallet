@@ -39,20 +39,24 @@ app = Application(APP_NAME, state=ScwState())
 
 
 @app.create
-def create(name: abi.String, version: abi.Uint64, threshold: abi.Uint64, *, output: abi.String):
+def create(name: abi.String, version: abi.Uint64, threshold: abi.Uint64, ownersCount: abi.Uint64, *, output: abi.String):
+    i = ScratchVar(TealType.uint64)
+    ownersCountScratchVar = ScratchVar(TealType.uint64)
+    offset = abi.Uint64()
+    offset.set(Int(0))
     return Seq(
         app.initialize_global_state(),
         app.state.name.set(name.get()),
         app.state.version.set(version.get()),
         app.state.threshold.set(threshold.get()),
+        app.state.ownersCount.set(ownersCount.get()),
+        ownersCountScratchVar.store(ownersCount.get()),
+        For(i.store(Int(0)), i.load() < ownersCountScratchVar.load(), i.store(i.load() + Int(1))).Do(
+           app.state.owners[Itob(i.load())].set(Substring(Txn.note(), offset.get(), offset.get() + Int(32))),
+           offset.set(offset.get() + Int(32))
+        ),
         output.set("Created smart contract wallet."),
     )
-
-@app.external
-def set_owner(index: abi.Uint64, address: abi.Address, *, output: abi.String):
-    return Seq(app.state.owners[index].set(address.get()),
-               app.state.ownersCount.set(app.state.ownersCount.get() + Int(1)),
-               output.set(Concat(Bytes("Added "), address.get(), Bytes(" as owner."))))
 
 
 @app.opt_in(bare=True)

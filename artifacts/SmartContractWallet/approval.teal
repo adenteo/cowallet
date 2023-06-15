@@ -1,12 +1,12 @@
 #pragma version 8
-intcblock 0 1 4
-bytecblock 0x 0x151f7c75 0x6f776e657273436f756e74 0x7468726573686f6c64 0x31 0x6e616d65 0x76657273696f6e
+intcblock 0 1 32 4
+bytecblock 0x 0x6f776e657273436f756e74 0x151f7c75 0x7468726573686f6c64 0x31 0x6e616d65 0x76657273696f6e
 txn NumAppArgs
 intc_0 // 0
 ==
 bnz main_l18
 txna ApplicationArgs 0
-pushbytes 0x85d874e3 // "create(string,uint64,uint64)string"
+pushbytes 0xa206bcee // "create(string,uint64,uint64,uint64)string"
 ==
 bnz main_l17
 txna ApplicationArgs 0
@@ -159,12 +159,13 @@ retsub
 
 // create
 create_1:
-proto 3 1
+proto 4 1
 bytec_0 // ""
+intc_0 // 0
 bytec 5 // "name"
 bytec_0 // ""
 app_global_put
-bytec_2 // "ownersCount"
+bytec_1 // "ownersCount"
 intc_0 // 0
 app_global_put
 bytec_3 // "threshold"
@@ -174,15 +175,47 @@ bytec 6 // "version"
 intc_0 // 0
 app_global_put
 bytec 5 // "name"
-frame_dig -3
+frame_dig -4
 extract 2 0
 app_global_put
 bytec 6 // "version"
-frame_dig -2
+frame_dig -3
 app_global_put
 bytec_3 // "threshold"
+frame_dig -2
+app_global_put
+bytec_1 // "ownersCount"
 frame_dig -1
 app_global_put
+frame_dig -1
+store 3
+intc_0 // 0
+store 2
+create_1_l1:
+load 2
+load 3
+<
+bz create_1_l3
+load 2
+itob
+callsub prefixkeygen_0
+txn Note
+frame_dig 1
+frame_dig 1
+intc_2 // 32
++
+substring3
+app_global_put
+frame_dig 1
+intc_2 // 32
++
+frame_bury 1
+load 2
+intc_1 // 1
++
+store 2
+b create_1_l1
+create_1_l3:
 pushbytes 0x001e4372656174656420736d61727420636f6e74726163742077616c6c65742e // 0x001e4372656174656420736d61727420636f6e74726163742077616c6c65742e
 frame_bury 0
 retsub
@@ -196,8 +229,8 @@ itob
 callsub prefixkeygen_0
 frame_dig -1
 app_global_put
-bytec_2 // "ownersCount"
-bytec_2 // "ownersCount"
+bytec_1 // "ownersCount"
+bytec_1 // "ownersCount"
 app_global_get
 intc_1 // 1
 +
@@ -237,7 +270,7 @@ extract 2 0
 callsub hasMetSignaturesThreshold_11
 assert
 itxn_begin
-intc_2 // axfer
+intc_3 // axfer
 itxn_field TypeEnum
 intc_0 // 0
 itxn_field AssetAmount
@@ -285,7 +318,7 @@ extract 2 0
 callsub hasMetSignaturesThreshold_11
 assert
 itxn_begin
-intc_2 // axfer
+intc_3 // axfer
 itxn_field TypeEnum
 frame_dig -2
 itxn_field AssetAmount
@@ -351,7 +384,7 @@ frame_dig -3
 extract 2 0
 pushbytes 0x30303030303030303030 // "0000000000"
 intc_0 // 0
-bytec_2 // "ownersCount"
+bytec_1 // "ownersCount"
 app_global_get
 substring3
 frame_dig -1
@@ -388,7 +421,7 @@ retsub
 // isOwner
 isOwner_10:
 proto 1 1
-bytec_2 // "ownersCount"
+bytec_1 // "ownersCount"
 app_global_get
 store 0
 intc_0 // 0
@@ -422,19 +455,19 @@ retsub
 // hasMetSignaturesThreshold
 hasMetSignaturesThreshold_11:
 proto 1 1
-bytec_2 // "ownersCount"
+bytec_1 // "ownersCount"
 app_global_get
-store 2
-intc_0 // 0
-store 3
-intc_0 // 0
 store 4
+intc_0 // 0
+store 5
+intc_0 // 0
+store 6
 hasMetSignaturesThreshold_11_l1:
+load 6
 load 4
-load 2
 <
 bnz hasMetSignaturesThreshold_11_l5
-load 3
+load 5
 bytec_3 // "threshold"
 app_global_get
 >=
@@ -446,23 +479,23 @@ intc_1 // 1
 retsub
 hasMetSignaturesThreshold_11_l5:
 frame_dig -1
-load 4
+load 6
 intc_1 // 1
 box_extract
 bytec 4 // "1"
 ==
 bnz hasMetSignaturesThreshold_11_l7
 hasMetSignaturesThreshold_11_l6:
-load 4
+load 6
 intc_1 // 1
 +
-store 4
+store 6
 b hasMetSignaturesThreshold_11_l1
 hasMetSignaturesThreshold_11_l7:
-load 3
+load 5
 intc_1 // 1
 +
-store 3
+store 5
 b hasMetSignaturesThreshold_11_l6
 
 // create_caster
@@ -471,7 +504,7 @@ proto 0 0
 bytec_0 // ""
 dup
 intc_0 // 0
-dup
+dupn 2
 txna ApplicationArgs 1
 frame_bury 1
 txna ApplicationArgs 2
@@ -480,12 +513,16 @@ frame_bury 2
 txna ApplicationArgs 3
 btoi
 frame_bury 3
+txna ApplicationArgs 4
+btoi
+frame_bury 4
 frame_dig 1
 frame_dig 2
 frame_dig 3
+frame_dig 4
 callsub create_1
 frame_bury 0
-bytec_1 // 0x151f7c75
+bytec_2 // 0x151f7c75
 frame_dig 0
 concat
 log
@@ -506,7 +543,7 @@ frame_dig 1
 frame_dig 2
 callsub setowner_2
 frame_bury 0
-bytec_1 // 0x151f7c75
+bytec_2 // 0x151f7c75
 frame_dig 0
 concat
 log
@@ -522,7 +559,7 @@ frame_bury 1
 frame_dig 1
 callsub optinASA_4
 frame_bury 0
-bytec_1 // 0x151f7c75
+bytec_2 // 0x151f7c75
 frame_dig 0
 concat
 log
@@ -543,7 +580,7 @@ frame_dig 1
 frame_dig 2
 callsub sendalgos_5
 frame_bury 0
-bytec_1 // 0x151f7c75
+bytec_2 // 0x151f7c75
 frame_dig 0
 concat
 log
@@ -564,7 +601,7 @@ frame_dig 1
 frame_dig 2
 callsub sendASA_6
 frame_bury 0
-bytec_1 // 0x151f7c75
+bytec_2 // 0x151f7c75
 frame_dig 0
 concat
 log
@@ -580,7 +617,7 @@ frame_bury 1
 frame_dig 1
 callsub signtxn_7
 frame_bury 0
-bytec_1 // 0x151f7c75
+bytec_2 // 0x151f7c75
 frame_dig 0
 concat
 log
@@ -602,7 +639,7 @@ frame_dig 2
 frame_dig 3
 callsub addtxn_8
 frame_bury 0
-bytec_1 // 0x151f7c75
+bytec_2 // 0x151f7c75
 frame_dig 0
 concat
 log
