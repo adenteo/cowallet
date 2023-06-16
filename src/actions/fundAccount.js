@@ -8,9 +8,10 @@ const creator = algosdk.mnemonicToSecretKey(
 );
 const algodClient = getAlgodClient(process.env.NEXT_PUBLIC_NETWORK);
 
+console.log(creator);
+console.log(process.env.NEXT_PUBLIC_NETWORK);
 (async () => {
     const suggestedParams = await algodClient.getTransactionParams().do();
-
     const paymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
         from: creator.addr,
         to: "L5FE66M2UHHD6HC7YB3GHS5GBTCJGMBRZPNFMLSPVM2WYSTAMLWXRVTOSU",
@@ -29,4 +30,5 @@ const algodClient = getAlgodClient(process.env.NEXT_PUBLIC_NETWORK);
         tx.txID,
         4
     );
+    console.log(confirmedTxn["application-index"]);
 })();

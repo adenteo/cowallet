@@ -17,7 +17,7 @@ const algodClient = getAlgodClient(process.env.NEXT_PUBLIC_NETWORK);
 const contractData = require("../../../../artifacts/SmartContractWallet/contract.json");
 const contract = new algosdk.ABIContract(contractData);
 
-export default function Page({ params, searchParams }) {
+export default async function Page({ params, searchParams }) {
     const {
         providers,
         activeAccount,
@@ -77,14 +77,14 @@ export default function Page({ params, searchParams }) {
             const appGlobalStateDecodedObject = await readGlobalState(
                 parseInt(appId)
             );
-            console.log(appGlobalStateDecodedObject);
-            console.log(boxesResponse);
             const txnsInfo = await Promise.all(
                 boxesResponse.boxes.map(async (box) => {
                     const boxResponse = await algodClient
                         .getApplicationBoxByName(parseInt(appId), box.name)
                         .do();
                     const boxValue = boxResponse.value;
+                    const minBalance =
+                        2500 + 400 * (box.name.length + boxValue.length);
                     let signaturesCount = 0;
                     let signers = [];
                     boxValue
@@ -125,6 +125,7 @@ export default function Page({ params, searchParams }) {
                         txnType: txnType,
                         signatures: parseInt(signaturesCount),
                         signers: signers,
+                        minBalance: minBalance,
                     };
                 })
             );
@@ -136,6 +137,7 @@ export default function Page({ params, searchParams }) {
     const firstFive = appAddr.substring(0, 5);
     const lastFive = appAddr.substring(appAddr.length - 5);
     const appAddrShort = `${firstFive}...${lastFive}`;
+
     return (
         <WalletContext.Provider value={{ handleWalletRender }}>
             {appInfo && (
@@ -166,7 +168,7 @@ export default function Page({ params, searchParams }) {
                             handleWalletRender={handleWalletRender}
                         />
                     )}
-                    <div className="bg-white rounded-lg m-8 p-4 mx-auto max-w-xs text-center shadow-xl border-b-4 border-slate-700 lg:m-4 lg:min-h-[80vh] lg:max-h-[80vh] lg:flex lg:flex-col lg:justify-center lg:items-center lg:mt-12 lg:min-w-[20vw]">
+                    <div className="bg-white rounded-lg mt-6 p-4 mx-auto max-w-xs text-center shadow-xl border-b-4 border-slate-700 lg:m-4 lg:min-h-[80vh] lg:max-h-[80vh] lg:flex lg:flex-col lg:justify-center lg:items-center lg:mt-12 lg:min-w-[20vw]">
                         {owners.includes(activeAddress) ? (
                             <div className="text-white bg-green-500 p-1 rounded-full lg:px-4">
                                 Owner
@@ -191,7 +193,12 @@ export default function Page({ params, searchParams }) {
                         <div className="text-xs text-stone-500">
                             ID: {appId}
                         </div>
-                        <span className="text-xs text-stone-500 sm:mt-4">
+                        <div className="text-xs text-stone-500">
+                            Min Balance:{" "}
+                            {parseInt(accInfo["min-balance"]) / 1e6}
+                            {" ALGOs"}
+                        </div>
+                        <span className="text-xs text-stone-500 sm:mt-2">
                             Balance:
                         </span>
                         <div className="text-4xl font-bold">
@@ -213,10 +220,10 @@ export default function Page({ params, searchParams }) {
                                     setIsReceiveTxnPopupOpen(true);
                                 }}
                             >
-                                <div className="rounded-full sm:rounded-md sm:my-2 p-2.5 w-10 h-10 mx-auto bg-slate-800 text-white hover:scale-110">
+                                <div className="rounded-full sm:rounded-md p-2.5 w-10 h-10 mx-auto bg-slate-800 text-white hover:scale-110">
                                     <MdCallReceived className="text-xl" />
                                 </div>
-                                <label className="text-xs cursor-pointer">
+                                <label className="text-xs cursor-pointer font-semibold lg:mt-2">
                                     Receive
                                 </label>
                             </div>
@@ -231,11 +238,11 @@ export default function Page({ params, searchParams }) {
                                     onClick={() => {
                                         setIsCreateTxnPopupOpen(true);
                                     }}
-                                    className="rounded-full sm:rounded-md sm:my-2 p-2.5 w-10 h-10 mx-auto bg-slate-800 text-white hover:scale-110"
+                                    className="rounded-full sm:rounded-md p-2.5 w-10 h-10 mx-auto bg-slate-800 text-white hover:scale-110 lg:mt-4"
                                 >
                                     <BiSend className="text-xl" />
                                 </div>
-                                <label className="text-xs cursor-pointer">
+                                <label className="text-xs cursor-pointer font-semibold lg:mt-2">
                                     Send
                                 </label>
                             </div>

@@ -1,13 +1,11 @@
 export default function Loading() {
     return (
-        <div role="status" className="max-w-md animate-pulse mx-auto">
-            <div className="h-96 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"></div>
-            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[360px] mb-2.5"></div>
-            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[330px] mb-2.5"></div>
-            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[300px] mb-2.5"></div>
-            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[360px]"></div>
-            <span className="sr-only">Loading...</span>
+        <div
+            role="status"
+            className="max-w-screen animate-pulse mx-auto flex flex-col justify-center items-center lg:flex-row"
+        >
+            <div className="h-[30vh] bg-gray-200 dark:bg-gray-700 w-[80vw] mb-4 mt-8 rounded-md lg:w-[20vw] lg:h-[80vh] lg:m-8"></div>
+            <div className="bg-gray-200 mt-2 rounded-md h-[80vh] w-[70vw] lg:m-8"></div>
         </div>
     );
 }

@@ -7,7 +7,6 @@ const readGlobalState = async (appId) => {
     const app = await algodClient.getApplicationByID(appId).do();
     // global state is a key value array
     const globalState = app.params["global-state"];
-    console.log(globalState);
     const globalStateDecoded = globalState.map((state) => {
         let decodedKey = Buffer.from(state.key, "base64").toString();
         const decodedValue =

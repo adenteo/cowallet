@@ -63,7 +63,6 @@ export default function TxnsAccordion({ txns, appId, appInfo, owners }) {
     };
 
     const isOwner = owners.includes(activeAddress);
-    console.log(txns);
 
     /**
      * Handles the submitting of transaction to network.
@@ -241,6 +240,10 @@ export default function TxnsAccordion({ txns, appId, appInfo, owners }) {
                                 {txn.txn.lastRound}
                             </span>
                         </div>
+                        <span className="text-xs text-green-500">
+                            Minimum balance decreases by {txn.minBalance / 1e6}{" "}
+                            ALGOs after execution of this transaction.
+                        </span>
                         <div className="flex">
                             {isOwner && (
                                 <div>

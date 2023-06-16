@@ -46,7 +46,6 @@ export default function AddTransaction({
 
     const isOptedIn = async (addr, assetId) => {
         const acc = await algodClient.accountInformation(addr).do();
-        console.log(acc);
         const holdingAssets = acc["assets"];
         const holdingAsset = holdingAssets.find((asset) => {
             return asset["asset-id"] == assetId;

@@ -1,11 +1,16 @@
 "use client";
 import { BiWallet } from "react-icons/bi";
-import { useWallet } from "@txnlab/use-wallet";
+import {
+    reconnectProviders,
+    initializeProviders,
+    PROVIDER_ID,
+    useWallet,
+} from "@txnlab/use-wallet";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { IoIosArrowBack } from "react-icons/io";
 import AddOwnerPopup from "./addOwnerPopup";
-import { getAlgodClient } from "../../clients";
+import { getAlgodClient, getNetworkCredentials } from "../../clients";
 import algosdk from "algosdk";
 import {
     Button,
@@ -14,11 +19,27 @@ import {
     PopoverContent,
 } from "@material-tailwind/react";
 
-import { addOwners } from "../../useractions/addOwners";
+const network = process.env.NEXT_PUBLIC_NETWORK || "SandNet";
+const cred = getNetworkCredentials(network);
+
+const walletProviders = initializeProviders(
+    [
+        PROVIDER_ID.WALLETCONNECT,
+        PROVIDER_ID.PERA,
+        PROVIDER_ID.DEFLY,
+        PROVIDER_ID.KMD,
+    ],
+    {
+        network: network.toLowerCase(), //betanet, testnet, mainnet, sandnet
+        nodeServer: cred.algod.address || "",
+        nodeToken: cred.algod.token || "",
+        nodePort: cred.algod.port || "",
+    }
+);
 
 const algodClient = getAlgodClient(process.env.NEXT_PUBLIC_NETWORK);
 
-export default function CreateWallet() {
+export default async function CreateWallet() {
     const router = useRouter();
     const {
         isReady,
@@ -94,16 +115,7 @@ export default function CreateWallet() {
         } catch (error) {
             console.error("Error:", error);
         }
-        setFormData({
-            version: "",
-            name: "",
-            threshold: "",
-            fundingAmt: "",
-            owners: [],
-        });
-        setOwners([activeAddress]);
     };
-
     return step === "Details" ? (
         <div className="flex flex-col items-center justify-center h-[94vh] max-h-[94vh]">
             {isAddOwnersPopupOpen && (
@@ -242,31 +254,31 @@ export default function CreateWallet() {
                 </h1>
                 <div className="my-3">
                     <form className="mx-auto w-xs lg:w-sm">
-                        <div className="text-center my-2 font-semibold">
+                        <div className="my-2 font-semibold">
                             Name of wallet:{" "}
                             <span className="font-bold text-2xl underline underline-offset-4 text-center">
                                 {formData.name}
                             </span>
                         </div>
-                        <div className="text-center my-2 font-semibold">
+                        <div className="my-2 font-semibold">
                             Version:{" "}
                             <span className="font-bold text-2xl underline underline-offset-4 text-center">
                                 {formData.version}
                             </span>
                         </div>
-                        <div className="text-center my-2 font-semibold">
+                        <div className="my-2 font-semibold">
                             Signing threshold:{" "}
                             <span className="font-bold text-2xl underline underline-offset-4 text-center">
                                 {formData.threshold}
                             </span>
                         </div>
-                        <div className="text-center my-2 font-semibold">
+                        <div className="my-2 font-semibold">
                             No. of owners:{" "}
                             <span className="font-bold text-2xl underline underline-offset-4 text-center">
                                 {owners.length}
                             </span>
                         </div>
-                        <div className="text-center my-2 font-semibold">
+                        <div className="my-2 font-semibold">
                             Funding amount:{" "}
                             <span className="font-bold text-2xl underline underline-offset-4 text-center">
                                 {formData.fundingAmt}
