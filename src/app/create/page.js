@@ -22,24 +22,9 @@ import {
 const network = process.env.NEXT_PUBLIC_NETWORK || "SandNet";
 const cred = getNetworkCredentials(network);
 
-const walletProviders = initializeProviders(
-    [
-        PROVIDER_ID.WALLETCONNECT,
-        PROVIDER_ID.PERA,
-        PROVIDER_ID.DEFLY,
-        PROVIDER_ID.KMD,
-    ],
-    {
-        network: network.toLowerCase(), //betanet, testnet, mainnet, sandnet
-        nodeServer: cred.algod.address || "",
-        nodeToken: cred.algod.token || "",
-        nodePort: cred.algod.port || "",
-    }
-);
-
 const algodClient = getAlgodClient(process.env.NEXT_PUBLIC_NETWORK);
 
-export default async function CreateWallet() {
+export default function CreateWallet() {
     const router = useRouter();
     const {
         isReady,

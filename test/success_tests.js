@@ -75,7 +75,7 @@ const submitScwTxn = async (
     const signedTxn = appCreateTxn.signTxn(creator.sk);
     let tx = await algodClient.sendRawTransaction(signedTxn).do();
     console.log("Transaction : " + tx.txId);
-    let result = await algosdk.waitForConfirmation(algodClient, tx.txID, 4);
+    let result = await algosdk.waitForConfirmation(algodClient, tx.txId, 4);
     return result["application-index"];
 };
 
@@ -83,6 +83,7 @@ describe("Success Tests", function () {
     let appId;
     // Deploy Smart Wallet Contract with 3 owners and signing threshold of 2.
     this.beforeEach(async () => {
+        console.log(process.env.NEXT_PUBLIC_NETWORK);
         const owners = [
             creator.addr,
             "I5LYS46CGPBBBTMTUDVKEL5UKSTSBLUGHSYTYVCIUJ3ZEUO4JAS5PK3MJU",

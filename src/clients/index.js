@@ -1,6 +1,4 @@
 import algosdk from "algosdk";
-import * as dotenv from "dotenv";
-dotenv.config({ path: "./.env.local" });
 
 const getNetworkCredentials = (network) => {
     let algod_token = process.env.NEXT_PUBLIC_ALGOD_TOKEN;

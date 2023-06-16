@@ -12,10 +12,13 @@ console.log(creator);
 console.log(process.env.NEXT_PUBLIC_NETWORK);
 (async () => {
     const suggestedParams = await algodClient.getTransactionParams().do();
+    const creator = algosdk.mnemonicToSecretKey(
+        process.env.NEXT_PUBLIC_DEPLOYER_MNEMONIC
+    );
     const paymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
         from: creator.addr,
         to: "L5FE66M2UHHD6HC7YB3GHS5GBTCJGMBRZPNFMLSPVM2WYSTAMLWXRVTOSU",
-        amount: 1000000,
+        amount: 1e6,
         suggestedParams,
     });
 
@@ -23,12 +26,12 @@ console.log(process.env.NEXT_PUBLIC_NETWORK);
     // const { txn } = algosdk.decodeSignedTransaction(signedTxn);
     let tx = await algodClient.sendRawTransaction(signedTxn).do();
     console.log("Transaction : " + tx.txId);
-
+    console.log(await algodClient.status().do());
     // check results of very last txn
     let confirmedTxn = await algosdk.waitForConfirmation(
         algodClient,
-        tx.txID,
+        tx.txId,
         4
     );
-    console.log(confirmedTxn["application-index"]);
+    console.log(confirmedTxn);
 })();
