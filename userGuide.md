@@ -9,74 +9,80 @@ Before you begin, ensure that you have the following prerequisites:
 -   An Algorand blockchain node or access to a supported Algorand wallet.
 -   A basic understanding of Algorand's transaction types, account structures, and Algorand Standard Assets (ASAs).
 
-## Creating a Smart Contract Wallet
+## Connecting a provider
 
-To create a smart contract wallet, follow these steps:
+To start using Cowallet, follow these steps:
 
 ![Home Screen](public/homeScreen.png)
 
-1. Connect a provider to CoWallet.
+1. Click "Connect" and select from a list of providers to connect to CoWallet.
 
-2.
+2. Once connected, you will be able to create or load a CoWallet.
 
-## Performing Transactions
+## Creating a CoWallet
+
+To create a CoWallet, follow these steps:
+
+1. Click on "Create CoWallet" and fill in the neccessary details for your smart contract wallet. The default version should be `1` and the max number of CoWallet owners is currently set to `10`.
+
+![Create Wallet Screen](public/createWallet.png)
+
+2. Once you click on `Confirm Details` go ahead and confirm the details and proceed to create your CoWallet. You will be prompted to sign two transactions, one for initialising the smart contract, and another for funding your CoWallet.
+
+![Confirm Create Wallet Screen](public/confirmCreate.png)
+
+3. Once you have successfully signed both transactions, you will be redirected to your CoWallet dashboard, where you can access multiple other features.
+
+![CoWallet Screen](public/dashboard.png)
+
+## Creating Transactions
+
+### Receiving Algos
+
+To receive Algos or ASAs from your smart contract wallet, follow these steps:
+
+1. Click `Receive` on your CoWallet dashboard. You will see a pop-up with your CoWallet QR code as well as its public address. Use this address when receiving Algos or ASAs from others.
+
+![Receive Screen](public/receive.png)
 
 ### Sending Algos
 
 To send Algos from your smart contract wallet, follow these steps:
 
-1. Retrieve the recipient's Algorand address.
+1. Click `Send` on your CoWallet dashboard. You will see a pop-up allowing you to choose your desired transaction type.
 
-2. Call the appropriate function or method in your smart contract wallet to initiate the Algo transfer, providing the recipient's address and the desired amount of Algos as parameters.
+![Choose Txn Screen](public/createTxn.png)
 
-3. Sign the transaction using the private key associated with your smart contract wallet.
+1. Once you have chose your transaction type, fill in the necessary details and click on `Create Transaction`. You will be prompted to confirm the details.
 
-4. Submit the signed transaction to the Algorand network for processing.
+![Confirm Txn Screen](public/confirmTxn.png)
 
-### Sending ASAs
+2. Click on `Submit` to create your pending transaction. Once submitted, you should see it appear on your dashboard. Click on the dropdown button to view the details of the pending transactions.
 
-To send ASAs from your smart contract wallet, follow these steps:
+![Show Txn Screen](public/showTxns.png)
 
-1. Retrieve the recipient's Algorand address.
+## Signing Transactions
 
-2. Retrieve the asset ID of the ASA you want to send.
+To sign transactions from your CoWallet, follow these steps:
 
-3. Call the appropriate function or method in your smart contract wallet to initiate the ASA transfer, providing the recipient's address, the asset ID, and the desired amount of ASAs as parameters.
+1. Click on `Sign Transaction` in the dropdown view of the pending transaction. You will be prompted to sign the transaction with your connected account. If you are not opted-in to the CoWallet, an opt-in transaction will automatically be added to the atomic transaction you are signing.
 
-4. Sign the transaction using the private key associated with your smart contract wallet.
+![Show Sign Txn Screen](public/showSignTxn.png)
 
-5. Submit the signed transaction to the Algorand network for processing.
+2. Once signed, you should be able to see a success notification as well as the updated status of your pending transaction.
 
-### Opting into ASAs
+![Show Signed Txn Screen](public/signedTxn.png)
 
-To opt into an ASA from your smart contract wallet, follow these steps:
+## Executing Transactions
 
-1. Retrieve the asset ID of the ASA you want to opt into.
+To execute transactions from your CoWallet, follow these steps:
 
-2. Call the appropriate function or method in your smart contract wallet to initiate the opt-in transaction, providing the asset ID as a parameter.
+1. One the signing threshold of the pending transaction has been met, you will be able to execute the transaction, provided that you are an owner of the CoWallet.
 
-3. Sign the transaction using the private key associated with your smart contract wallet.
+![Show Ready to Execute Txn Screen](public/readyToExecute.png)
 
-4. Submit the signed transaction to the Algorand network for processing.
-
-### Receiving Algos and ASAs
-
-To receive Algos or ASAs into your smart contract wallet, provide your smart contract wallet's address to the sender. They can then initiate the transfer to your address using the appropriate method or function.
-
-## Signing and Executing Transactions
-
-To sign and execute transactions from your smart contract wallet, follow these steps:
-
-1. Construct the transaction object with the desired parameters, such as the recipient's address, asset ID (if applicable), and transaction amount.
-
-2. Sign the transaction using the private key associated with your smart contract wallet.
-
-3. Submit the signed transaction to the Algorand network for processing.
-
-4. Monitor the status of the transaction to ensure it is successfully executed.
+2. Click on `Execute Transaction` to submit the pending transaction to the network. You will be prompted to sign the submit transaction.
 
 ## Conclusion
 
 By following the instructions in this user guide, you can create a smart contract wallet, perform various transactions including sending Algos and ASAs, opt into ASAs, receive Algos and ASAs, sign transactions, and execute transactions. Remember to understand the implications and costs associated with each transaction type before proceeding.
-
-If you encounter any issues or have questions, please refer to the
