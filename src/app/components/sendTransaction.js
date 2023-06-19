@@ -10,6 +10,7 @@ import {
     PopoverContent,
     Button,
 } from "@material-tailwind/react";
+import { createOptInTxn } from "../../useractions/createOptInTxn";
 
 const { v4: uuidv4 } = require("uuid");
 
@@ -219,6 +220,11 @@ export default function AddTransaction({
             ...commonParams,
         };
         const atc = new algosdk.AtomicTransactionComposer();
+        const optInTxn = await createOptInTxn(activeAddress, parseInt(appId));
+        if (optInTxn) {
+            console.log("Adding Opt-in txn.");
+            atc.addTransaction({ txn: optInTxn, signer });
+        }
         atc.addMethodCall(storeTxnAppCall);
         const result = await atc.execute(algodClient, 4);
         handleWalletRender();

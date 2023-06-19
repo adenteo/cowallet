@@ -103,6 +103,7 @@ export default async function Page({ params, searchParams }) {
                             appGlobalStateDecodedObject.ownersCount + 1
                         )
                     );
+                    console.log(txnDecoded);
                     let txnType = boxValue
                         .slice(
                             appGlobalStateDecodedObject.ownersCount,

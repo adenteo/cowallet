@@ -69,6 +69,7 @@ def opt_in():
 def opt_in_ASA(boxName: abi.String,*, output: abi.String):
     return Seq(
         Assert(isOwner(Txn.sender())),
+        Assert(App.optedIn(Int(0), Int(0))),
         Assert(hasMetSignaturesThreshold(boxName.get())),
         InnerTxnBuilder.Begin(),
         InnerTxnBuilder.SetFields(
@@ -88,6 +89,7 @@ def opt_in_ASA(boxName: abi.String,*, output: abi.String):
 def send_algos(amount: abi.Uint64, boxName: abi.String, *, output: abi.String):
     return Seq(
         Assert(isOwner(Txn.sender())),
+        Assert(App.optedIn(Int(0), Int(0))),
         Assert(hasMetSignaturesThreshold(boxName.get())),
         InnerTxnBuilder.Begin(),
           InnerTxnBuilder.SetFields(
@@ -105,6 +107,7 @@ def send_algos(amount: abi.Uint64, boxName: abi.String, *, output: abi.String):
 def send_ASA(amount: abi.Uint64, boxName: abi.String, *, output: abi.String):
     return Seq(
         Assert(isOwner(Txn.sender())),
+        Assert(App.optedIn(Int(0), Int(0))),
         Assert(hasMetSignaturesThreshold(boxName.get())),
         InnerTxnBuilder.Begin(),
           InnerTxnBuilder.SetFields(
@@ -126,6 +129,7 @@ def sign_txn(name: abi.String,*,output: abi.String):
     status = App.box_extract(name.get(), index - Int(1), Int(1))
     return Seq([
         Assert(index),
+        Assert(App.optedIn(Int(0), Int(0))),
         Assert(status == Bytes("0")),
         App.box_replace(name.get(), index - Int(1), Bytes("1")),
         output.set(Concat(Txn.sender(), Bytes(" signed transaction "), name.get()))
@@ -137,6 +141,7 @@ def add_txn(name: abi.String, txn: abi.String, txnType: abi.String,*,output: abi
     index = isOwner(Txn.sender())
     return Seq([
         Assert(index),
+        Assert(App.optedIn(Int(0), Int(0))),
         App.box_put(name.get(), Concat(Substring(Bytes("0000000000"), Int(0), app.state.ownersCount.get()), txnType.get(), txn.get())),
         App.box_replace(name.get(), index - Int(1), Bytes("1")), # Set txn creator's signing status to signed.
         output.set("Added txn to box storage")
@@ -146,6 +151,7 @@ def add_txn(name: abi.String, txn: abi.String, txnType: abi.String,*,output: abi
 def remove_txn(name: abi.String):
     return Seq([
         Assert(isOwner(Txn.sender())),
+        Assert(App.optedIn(Int(0), Int(0))),
         Assert(App.box_delete(name.get()))
     ])
 
@@ -161,7 +167,6 @@ def isOwner(sender):
         ),
         Return(Int(0))
     ])
-
 
 @Subroutine(TealType.uint64)
 def hasMetSignaturesThreshold(boxName):

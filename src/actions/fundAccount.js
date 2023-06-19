@@ -20,7 +20,7 @@ const fundAccount = async (addr, amount) => {
     const signedTxn = paymentTxn.signTxn(creator.sk);
     // const { txn } = algosdk.decodeSignedTransaction(signedTxn);
     let tx = await algodClient.sendRawTransaction(signedTxn).do();
-    console.log("Transaction : " + tx.txId);
+    console.log("Funding transaction : " + tx.txId);
     // check results of very last txn
     let confirmedTxn = await algosdk.waitForConfirmation(
         algodClient,

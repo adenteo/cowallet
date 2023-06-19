@@ -219,6 +219,10 @@ bytec_0 // ""
 txn Sender
 callsub isOwner_9
 assert
+intc_0 // 0
+intc_0 // 0
+app_opted_in
+assert
 frame_dig -1
 extract 2 0
 callsub hasMetSignaturesThreshold_10
@@ -244,6 +248,10 @@ bytec_0 // ""
 txn Sender
 callsub isOwner_9
 assert
+intc_0 // 0
+intc_0 // 0
+app_opted_in
+assert
 frame_dig -1
 extract 2 0
 callsub hasMetSignaturesThreshold_10
@@ -266,6 +274,10 @@ proto 2 1
 bytec_0 // ""
 txn Sender
 callsub isOwner_9
+assert
+intc_0 // 0
+intc_0 // 0
+app_opted_in
 assert
 frame_dig -1
 extract 2 0
@@ -291,6 +303,10 @@ proto 1 1
 bytec_0 // ""
 txn Sender
 callsub isOwner_9
+assert
+intc_0 // 0
+intc_0 // 0
+app_opted_in
 assert
 frame_dig -1
 extract 2 0
@@ -334,6 +350,10 @@ bytec_0 // ""
 txn Sender
 callsub isOwner_9
 assert
+intc_0 // 0
+intc_0 // 0
+app_opted_in
+assert
 frame_dig -3
 extract 2 0
 pushbytes 0x30303030303030303030 // "0000000000"
@@ -365,6 +385,10 @@ removetxn_8:
 proto 1 0
 txn Sender
 callsub isOwner_9
+assert
+intc_0 // 0
+intc_0 // 0
+app_opted_in
 assert
 frame_dig -1
 extract 2 0
