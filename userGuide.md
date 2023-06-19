@@ -83,6 +83,10 @@ To execute transactions from your CoWallet, follow these steps:
 
 2. Click on `Execute Transaction` to submit the pending transaction to the network. You will be prompted to sign the submit transaction.
 
+3. Once submitted, you will be able to see a success notification as shown.
+
+![Executed Txn Screen](public/executedTxn.png)
+
 ## Conclusion
 
 By following the instructions in this user guide, you can create a smart contract wallet, perform various transactions including sending Algos and ASAs, opt into ASAs, receive Algos and ASAs, sign transactions, and execute transactions. Remember to understand the implications and costs associated with each transaction type before proceeding.
