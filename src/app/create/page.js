@@ -1,5 +1,6 @@
 "use client";
 import { BiWallet } from "react-icons/bi";
+import { AiOutlineLoading } from "react-icons/ai";
 import {
     reconnectProviders,
     initializeProviders,
@@ -41,6 +42,8 @@ export default function CreateWallet() {
     const [owners, setOwners] = useState([]);
     const [isAddOwnersPopupOpen, setIsAddOwnersPopupOpen] = useState(false);
     const [step, setStep] = useState("Details");
+    const [buttonMsg, setButtonMsg] = useState("Create Wallet");
+    const [buttonLoading, setButtonLoading] = useState(false);
 
     const onAddOwner = (address) => {
         setOwners([...owners, address]);
@@ -88,6 +91,8 @@ export default function CreateWallet() {
                 body: JSON.stringify(formData),
             });
             const txn = await response.text();
+            setButtonMsg("Creating wallet...");
+            setButtonLoading(true);
             const signedTxn = await signTransactions([
                 Buffer.from(txn, "base64"),
             ]);
@@ -95,7 +100,9 @@ export default function CreateWallet() {
             const appId = result["application-index"];
             const appAddr = algosdk.getApplicationAddress(parseInt(appId));
             // Fund wallet with algos
+            setButtonMsg("Funding wallet...");
             await fundWallet(appAddr);
+            setButtonMsg("Redirecting...");
             router.push("/wallet/" + appId);
         } catch (error) {
             console.error("Error:", error);
@@ -239,33 +246,33 @@ export default function CreateWallet() {
                 </h1>
                 <div className="my-3">
                     <form className="mx-auto w-xs lg:w-sm">
-                        <div className="my-2 font-semibold">
+                        <div className="my-2 font-semibold flex justify-between items-center">
                             Name of wallet:{" "}
-                            <span className="font-bold text-2xl underline underline-offset-4 text-center">
+                            <span className="font-bold underline underline-offset-4 text-center">
                                 {formData.name}
                             </span>
                         </div>
-                        <div className="my-2 font-semibold">
+                        <div className="my-2 font-semibold flex justify-between items-center">
                             Version:{" "}
-                            <span className="font-bold text-2xl underline underline-offset-4 text-center">
+                            <span className="font-bold underline underline-offset-4 text-center">
                                 {formData.version}
                             </span>
                         </div>
-                        <div className="my-2 font-semibold">
+                        <div className="my-2 font-semibold flex justify-between items-center">
                             Signing threshold:{" "}
-                            <span className="font-bold text-2xl underline underline-offset-4 text-center">
+                            <span className="font-bold underline underline-offset-4 text-center">
                                 {formData.threshold}
                             </span>
                         </div>
-                        <div className="my-2 font-semibold">
+                        <div className="my-2 font-semibold flex justify-between items-center">
                             No. of owners:{" "}
-                            <span className="font-bold text-2xl underline underline-offset-4 text-center">
+                            <span className="font-bold underline underline-offset-4 text-center">
                                 {owners.length}
                             </span>
                         </div>
-                        <div className="my-2 font-semibold">
+                        <div className="my-2 font-semibold flex justify-between items-center">
                             Funding amount:{" "}
-                            <span className="font-bold text-2xl underline underline-offset-4 text-center">
+                            <span className="font-bold underline underline-offset-4 text-center">
                                 {formData.fundingAmt}
                                 {" ALGO"}
                             </span>
@@ -297,9 +304,12 @@ export default function CreateWallet() {
                         <div className="mt-4 w-full">
                             <button
                                 onClick={handleSubmit}
-                                className="rounded-md bg-green-500 w-full px-4 py-2 text-base text-white hover:bg-green-700 hover:scale-105"
+                                className="rounded-md bg-green-500 w-full px-4 py-2 text-base text-white hover:bg-green-700 hover:scale-105 flex justify-center items-center"
                             >
-                                Create Wallet
+                                {buttonMsg}
+                                {buttonLoading && (
+                                    <AiOutlineLoading className="ml-2 animate-spin" />
+                                )}
                             </button>
                         </div>
                     </form>

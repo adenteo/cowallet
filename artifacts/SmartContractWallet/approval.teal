@@ -1,43 +1,51 @@
 #pragma version 8
 intcblock 0 1 32 4
-bytecblock 0x 0x6f776e657273436f756e74 0x151f7c75 0x7468726573686f6c64 0x31 0x6e616d65 0x76657273696f6e
+bytecblock 0x 0x151f7c75 0x6f776e657273436f756e74 0x7468726573686f6c64 0x31 0x6e616d65 0x76657273696f6e
 txn NumAppArgs
 intc_0 // 0
 ==
-bnz main_l18
+bnz main_l16
 txna ApplicationArgs 0
 pushbytes 0xa206bcee // "create(string,uint64,uint64,uint64)string"
 ==
-bnz main_l17
-txna ApplicationArgs 0
-pushbytes 0xfa703ebd // "set_owner(uint64,address)string"
-==
-bnz main_l16
+bnz main_l15
 txna ApplicationArgs 0
 pushbytes 0x6e4dcba9 // "opt_in_ASA(string)string"
 ==
-bnz main_l15
+bnz main_l14
 txna ApplicationArgs 0
 pushbytes 0x7e2d660d // "send_algos(uint64,string)string"
 ==
-bnz main_l14
+bnz main_l13
 txna ApplicationArgs 0
 pushbytes 0xb6103e62 // "send_ASA(uint64,string)string"
 ==
-bnz main_l13
+bnz main_l12
 txna ApplicationArgs 0
 pushbytes 0xb1ff38b5 // "sign_txn(string)string"
 ==
-bnz main_l12
+bnz main_l11
 txna ApplicationArgs 0
 pushbytes 0x2000995e // "add_txn(string,string,string)string"
 ==
-bnz main_l11
+bnz main_l10
 txna ApplicationArgs 0
 pushbytes 0x91e58fd3 // "remove_txn(string)void"
 ==
-bnz main_l10
+bnz main_l9
 err
+main_l9:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub removetxncaster_17
+intc_1 // 1
+return
 main_l10:
 txn OnCompletion
 intc_0 // NoOp
@@ -47,7 +55,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub removetxncaster_19
+callsub addtxncaster_16
 intc_1 // 1
 return
 main_l11:
@@ -59,7 +67,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub addtxncaster_18
+callsub signtxncaster_15
 intc_1 // 1
 return
 main_l12:
@@ -71,7 +79,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub signtxncaster_17
+callsub sendASAcaster_14
 intc_1 // 1
 return
 main_l13:
@@ -83,7 +91,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub sendASAcaster_16
+callsub sendalgoscaster_13
 intc_1 // 1
 return
 main_l14:
@@ -95,7 +103,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub sendalgoscaster_15
+callsub optinASAcaster_12
 intc_1 // 1
 return
 main_l15:
@@ -104,48 +112,24 @@ intc_0 // NoOp
 ==
 txn ApplicationID
 intc_0 // 0
-!=
+==
 &&
 assert
-callsub optinASAcaster_14
+callsub createcaster_11
 intc_1 // 1
 return
 main_l16:
 txn OnCompletion
-intc_0 // NoOp
-==
-txn ApplicationID
-intc_0 // 0
-!=
-&&
-assert
-callsub setownercaster_13
-intc_1 // 1
-return
-main_l17:
-txn OnCompletion
-intc_0 // NoOp
-==
-txn ApplicationID
-intc_0 // 0
-==
-&&
-assert
-callsub createcaster_12
-intc_1 // 1
-return
-main_l18:
-txn OnCompletion
 intc_1 // OptIn
 ==
-bnz main_l20
+bnz main_l18
 err
-main_l20:
+main_l18:
 txn ApplicationID
 intc_0 // 0
 !=
 assert
-callsub optin_3
+callsub optin_2
 intc_1 // 1
 return
 
@@ -165,7 +149,7 @@ intc_0 // 0
 bytec 5 // "name"
 bytec_0 // ""
 app_global_put
-bytec_1 // "ownersCount"
+bytec_2 // "ownersCount"
 intc_0 // 0
 app_global_put
 bytec_3 // "threshold"
@@ -184,7 +168,7 @@ app_global_put
 bytec_3 // "threshold"
 frame_dig -2
 app_global_put
-bytec_1 // "ownersCount"
+bytec_2 // "ownersCount"
 frame_dig -1
 app_global_put
 frame_dig -1
@@ -220,54 +204,24 @@ pushbytes 0x001e4372656174656420736d61727420636f6e74726163742077616c6c65742e // 
 frame_bury 0
 retsub
 
-// set_owner
-setowner_2:
-proto 2 1
-bytec_0 // ""
-frame_dig -2
-itob
-callsub prefixkeygen_0
-frame_dig -1
-app_global_put
-bytec_1 // "ownersCount"
-bytec_1 // "ownersCount"
-app_global_get
-intc_1 // 1
-+
-app_global_put
-pushbytes 0x416464656420 // "Added "
-frame_dig -1
-concat
-pushbytes 0x206173206f776e65722e // " as owner."
-concat
-frame_bury 0
-frame_dig 0
-len
-itob
-extract 6 0
-frame_dig 0
-concat
-frame_bury 0
-retsub
-
 // opt_in
-optin_3:
+optin_2:
 proto 0 0
 txn Sender
-callsub isOwner_10
+callsub isOwner_9
 assert
 retsub
 
 // opt_in_ASA
-optinASA_4:
+optinASA_3:
 proto 1 1
 bytec_0 // ""
 txn Sender
-callsub isOwner_10
+callsub isOwner_9
 assert
 frame_dig -1
 extract 2 0
-callsub hasMetSignaturesThreshold_11
+callsub hasMetSignaturesThreshold_10
 assert
 itxn_begin
 intc_3 // axfer
@@ -284,15 +238,15 @@ frame_bury 0
 retsub
 
 // send_algos
-sendalgos_5:
+sendalgos_4:
 proto 2 1
 bytec_0 // ""
 txn Sender
-callsub isOwner_10
+callsub isOwner_9
 assert
 frame_dig -1
 extract 2 0
-callsub hasMetSignaturesThreshold_11
+callsub hasMetSignaturesThreshold_10
 assert
 itxn_begin
 intc_1 // pay
@@ -307,15 +261,15 @@ frame_bury 0
 retsub
 
 // send_ASA
-sendASA_6:
+sendASA_5:
 proto 2 1
 bytec_0 // ""
 txn Sender
-callsub isOwner_10
+callsub isOwner_9
 assert
 frame_dig -1
 extract 2 0
-callsub hasMetSignaturesThreshold_11
+callsub hasMetSignaturesThreshold_10
 assert
 itxn_begin
 intc_3 // axfer
@@ -332,16 +286,16 @@ frame_bury 0
 retsub
 
 // sign_txn
-signtxn_7:
+signtxn_6:
 proto 1 1
 bytec_0 // ""
 txn Sender
-callsub isOwner_10
+callsub isOwner_9
 assert
 frame_dig -1
 extract 2 0
 txn Sender
-callsub isOwner_10
+callsub isOwner_9
 intc_1 // 1
 -
 intc_1 // 1
@@ -352,7 +306,7 @@ assert
 frame_dig -1
 extract 2 0
 txn Sender
-callsub isOwner_10
+callsub isOwner_9
 intc_1 // 1
 -
 bytec 4 // "1"
@@ -374,17 +328,17 @@ frame_bury 0
 retsub
 
 // add_txn
-addtxn_8:
+addtxn_7:
 proto 3 1
 bytec_0 // ""
 txn Sender
-callsub isOwner_10
+callsub isOwner_9
 assert
 frame_dig -3
 extract 2 0
 pushbytes 0x30303030303030303030 // "0000000000"
 intc_0 // 0
-bytec_1 // "ownersCount"
+bytec_2 // "ownersCount"
 app_global_get
 substring3
 frame_dig -1
@@ -397,7 +351,7 @@ box_put
 frame_dig -3
 extract 2 0
 txn Sender
-callsub isOwner_10
+callsub isOwner_9
 intc_1 // 1
 -
 bytec 4 // "1"
@@ -407,10 +361,10 @@ frame_bury 0
 retsub
 
 // remove_txn
-removetxn_9:
+removetxn_8:
 proto 1 0
 txn Sender
-callsub isOwner_10
+callsub isOwner_9
 assert
 frame_dig -1
 extract 2 0
@@ -419,87 +373,87 @@ assert
 retsub
 
 // isOwner
-isOwner_10:
+isOwner_9:
 proto 1 1
-bytec_1 // "ownersCount"
+bytec_2 // "ownersCount"
 app_global_get
 store 0
 intc_0 // 0
 store 1
-isOwner_10_l1:
+isOwner_9_l1:
 load 1
 load 0
 <
-bz isOwner_10_l5
+bz isOwner_9_l5
 load 1
 itob
 callsub prefixkeygen_0
 app_global_get
 frame_dig -1
 ==
-bnz isOwner_10_l4
+bnz isOwner_9_l4
 load 1
 intc_1 // 1
 +
 store 1
-b isOwner_10_l1
-isOwner_10_l4:
+b isOwner_9_l1
+isOwner_9_l4:
 load 1
 intc_1 // 1
 +
 retsub
-isOwner_10_l5:
+isOwner_9_l5:
 intc_0 // 0
 retsub
 
 // hasMetSignaturesThreshold
-hasMetSignaturesThreshold_11:
+hasMetSignaturesThreshold_10:
 proto 1 1
-bytec_1 // "ownersCount"
+bytec_2 // "ownersCount"
 app_global_get
 store 4
 intc_0 // 0
 store 5
 intc_0 // 0
 store 6
-hasMetSignaturesThreshold_11_l1:
+hasMetSignaturesThreshold_10_l1:
 load 6
 load 4
 <
-bnz hasMetSignaturesThreshold_11_l5
+bnz hasMetSignaturesThreshold_10_l5
 load 5
 bytec_3 // "threshold"
 app_global_get
 >=
-bnz hasMetSignaturesThreshold_11_l4
+bnz hasMetSignaturesThreshold_10_l4
 intc_0 // 0
 retsub
-hasMetSignaturesThreshold_11_l4:
+hasMetSignaturesThreshold_10_l4:
 intc_1 // 1
 retsub
-hasMetSignaturesThreshold_11_l5:
+hasMetSignaturesThreshold_10_l5:
 frame_dig -1
 load 6
 intc_1 // 1
 box_extract
 bytec 4 // "1"
 ==
-bnz hasMetSignaturesThreshold_11_l7
-hasMetSignaturesThreshold_11_l6:
+bnz hasMetSignaturesThreshold_10_l7
+hasMetSignaturesThreshold_10_l6:
 load 6
 intc_1 // 1
 +
 store 6
-b hasMetSignaturesThreshold_11_l1
-hasMetSignaturesThreshold_11_l7:
+b hasMetSignaturesThreshold_10_l1
+hasMetSignaturesThreshold_10_l7:
 load 5
 intc_1 // 1
 +
 store 5
-b hasMetSignaturesThreshold_11_l6
+b hasMetSignaturesThreshold_10_l6
 
 // create_caster
-createcaster_12:
+createcaster_11:
 proto 0 0
 bytec_0 // ""
 dup
@@ -522,51 +476,30 @@ frame_dig 3
 frame_dig 4
 callsub create_1
 frame_bury 0
-bytec_2 // 0x151f7c75
-frame_dig 0
-concat
-log
-retsub
-
-// set_owner_caster
-setownercaster_13:
-proto 0 0
-bytec_0 // ""
-intc_0 // 0
-bytec_0 // ""
-txna ApplicationArgs 1
-btoi
-frame_bury 1
-txna ApplicationArgs 2
-frame_bury 2
-frame_dig 1
-frame_dig 2
-callsub setowner_2
-frame_bury 0
-bytec_2 // 0x151f7c75
+bytec_1 // 0x151f7c75
 frame_dig 0
 concat
 log
 retsub
 
 // opt_in_ASA_caster
-optinASAcaster_14:
+optinASAcaster_12:
 proto 0 0
 bytec_0 // ""
 dup
 txna ApplicationArgs 1
 frame_bury 1
 frame_dig 1
-callsub optinASA_4
+callsub optinASA_3
 frame_bury 0
-bytec_2 // 0x151f7c75
+bytec_1 // 0x151f7c75
 frame_dig 0
 concat
 log
 retsub
 
 // send_algos_caster
-sendalgoscaster_15:
+sendalgoscaster_13:
 proto 0 0
 bytec_0 // ""
 intc_0 // 0
@@ -578,16 +511,16 @@ txna ApplicationArgs 2
 frame_bury 2
 frame_dig 1
 frame_dig 2
-callsub sendalgos_5
+callsub sendalgos_4
 frame_bury 0
-bytec_2 // 0x151f7c75
+bytec_1 // 0x151f7c75
 frame_dig 0
 concat
 log
 retsub
 
 // send_ASA_caster
-sendASAcaster_16:
+sendASAcaster_14:
 proto 0 0
 bytec_0 // ""
 intc_0 // 0
@@ -599,32 +532,32 @@ txna ApplicationArgs 2
 frame_bury 2
 frame_dig 1
 frame_dig 2
-callsub sendASA_6
+callsub sendASA_5
 frame_bury 0
-bytec_2 // 0x151f7c75
+bytec_1 // 0x151f7c75
 frame_dig 0
 concat
 log
 retsub
 
 // sign_txn_caster
-signtxncaster_17:
+signtxncaster_15:
 proto 0 0
 bytec_0 // ""
 dup
 txna ApplicationArgs 1
 frame_bury 1
 frame_dig 1
-callsub signtxn_7
+callsub signtxn_6
 frame_bury 0
-bytec_2 // 0x151f7c75
+bytec_1 // 0x151f7c75
 frame_dig 0
 concat
 log
 retsub
 
 // add_txn_caster
-addtxncaster_18:
+addtxncaster_16:
 proto 0 0
 bytec_0 // ""
 dupn 3
@@ -637,20 +570,20 @@ frame_bury 3
 frame_dig 1
 frame_dig 2
 frame_dig 3
-callsub addtxn_8
+callsub addtxn_7
 frame_bury 0
-bytec_2 // 0x151f7c75
+bytec_1 // 0x151f7c75
 frame_dig 0
 concat
 log
 retsub
 
 // remove_txn_caster
-removetxncaster_19:
+removetxncaster_17:
 proto 0 0
 bytec_0 // ""
 txna ApplicationArgs 1
 frame_bury 0
 frame_dig 0
-callsub removetxn_9
+callsub removetxn_8
 retsub

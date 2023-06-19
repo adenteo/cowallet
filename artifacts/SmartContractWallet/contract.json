@@ -26,22 +26,6 @@
             }
         },
         {
-            "name": "set_owner",
-            "args": [
-                {
-                    "type": "uint64",
-                    "name": "index"
-                },
-                {
-                    "type": "address",
-                    "name": "address"
-                }
-            ],
-            "returns": {
-                "type": "string"
-            }
-        },
-        {
             "name": "opt_in_ASA",
             "args": [
                 {

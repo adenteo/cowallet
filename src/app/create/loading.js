@@ -1,6 +1,5 @@
 export default function Loading() {
     // You can add any UI inside Loading, including a Skeleton.
-    console.log("LOADING2");
     return (
         <div
             role="status"
