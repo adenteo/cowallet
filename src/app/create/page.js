@@ -7,6 +7,7 @@ import {
     PROVIDER_ID,
     useWallet,
 } from "@txnlab/use-wallet";
+import { GoAlert } from "react-icons/go";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { IoIosArrowBack } from "react-icons/io";
@@ -18,6 +19,7 @@ import {
     Popover,
     PopoverHandler,
     PopoverContent,
+    Alert,
 } from "@material-tailwind/react";
 
 const network = process.env.NEXT_PUBLIC_NETWORK || "SandNet";
@@ -44,6 +46,7 @@ export default function CreateWallet() {
     const [step, setStep] = useState("Details");
     const [buttonMsg, setButtonMsg] = useState("Create Wallet");
     const [buttonLoading, setButtonLoading] = useState(false);
+    const [createWalletFailure, setCreateWalletFailure] = useState(false);
 
     const onAddOwner = (address) => {
         setOwners([...owners, address]);
@@ -96,14 +99,22 @@ export default function CreateWallet() {
             const signedTxn = await signTransactions([
                 Buffer.from(txn, "base64"),
             ]);
-            const result = await sendTransactions(signedTxn, 4);
-            const appId = result["application-index"];
-            const appAddr = algosdk.getApplicationAddress(parseInt(appId));
-            // Fund wallet with algos
-            setButtonMsg("Funding wallet...");
-            await fundWallet(appAddr);
-            setButtonMsg("Redirecting...");
-            router.push("/wallet/" + appId);
+            try {
+                const result = await sendTransactions(signedTxn, 4);
+                const appId = result["application-index"];
+                const appAddr = algosdk.getApplicationAddress(parseInt(appId));
+                // Fund wallet with algos
+                setButtonMsg("Funding wallet...");
+                await fundWallet(appAddr);
+                setButtonMsg("Redirecting...");
+                router.push("/wallet/" + appId);
+            } catch (err) {
+                setCreateWalletFailure(true);
+                setButtonMsg("Create Wallet");
+                setButtonLoading(false);
+                console.log(err);
+                return;
+            }
         } catch (error) {
             console.error("Error:", error);
         }
@@ -223,6 +234,27 @@ export default function CreateWallet() {
         </div>
     ) : (
         <div className="flex flex-col items-center justify-center h-[94vh] max-h-[94vh]">
+            <Alert
+                className="absolute bg-red-700 bottom-20 p-4 w-4/5 left-[10%]"
+                variant="gradient"
+                color="red"
+                open={createWalletFailure}
+                icon={<GoAlert className="h-6 w-6 mr-2" />}
+                action={
+                    <Button
+                        variant="text"
+                        color="white"
+                        size="sm"
+                        className="!absolute top-10 right-3 lg:top-3"
+                        onClick={() => setCreateWalletFailure(false)}
+                    >
+                        Close
+                    </Button>
+                }
+            >
+                Failed to create wallet. Please ensure your account is
+                sufficiently funded.
+            </Alert>
             {isAddOwnersPopupOpen && (
                 <AddOwnerPopup
                     owners={owners}
