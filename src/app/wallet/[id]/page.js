@@ -17,7 +17,7 @@ const algodClient = getAlgodClient(process.env.NEXT_PUBLIC_NETWORK);
 const contractData = require("../../../../artifacts/SmartContractWallet/contract.json");
 const contract = new algosdk.ABIContract(contractData);
 
-export default async function Page({ params, searchParams }) {
+export default function Page({ params, searchParams }) {
     const {
         providers,
         activeAccount,
@@ -103,7 +103,6 @@ export default async function Page({ params, searchParams }) {
                             appGlobalStateDecodedObject.ownersCount + 1
                         )
                     );
-                    console.log(txnDecoded);
                     let txnType = boxValue
                         .slice(
                             appGlobalStateDecodedObject.ownersCount,

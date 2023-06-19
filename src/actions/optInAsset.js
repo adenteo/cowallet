@@ -22,7 +22,6 @@ const algodClient = getAlgodClient(process.env.NEXT_PUBLIC_NETWORK);
     const signedTxn = optInTxn.signTxn(creator.sk);
     // const { txn } = algosdk.decodeSignedTransaction(signedTxn);
     let tx = await algodClient.sendRawTransaction(signedTxn).do();
-    console.log("Transaction : " + tx.txId);
 
     // check results of very last txn
     let confirmedTxn = await algosdk.waitForConfirmation(

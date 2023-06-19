@@ -91,7 +91,6 @@ export default function TxnsAccordion({ txns, appId, appInfo, owners }) {
         atc.addMethodCall(removeTxnAppCall);
         const optInTxn = await createOptInTxn(activeAddress, parseInt(appId));
         if (optInTxn) {
-            console.log("Adding Opt-in txn.");
             atc.addTransaction({ txn: optInTxn, signer });
         }
         try {
@@ -127,16 +126,18 @@ export default function TxnsAccordion({ txns, appId, appInfo, owners }) {
             boxes: [{ appIndex: 0, name: new Uint8Array(Buffer.from(name)) }],
             ...commonParams,
         };
-        atc.addMethodCall(signTxnAppCall);
         const optInTxn = await createOptInTxn(activeAddress, parseInt(appId));
         if (optInTxn) {
-            console.log("Adding Opt-in txn.");
+            console.log("Opting in");
             atc.addTransaction({ txn: optInTxn, signer });
         }
+        atc.addMethodCall(signTxnAppCall);
         try {
             const result = await atc.execute(algodClient, 4);
+            console.log(result);
             setSignTxnSuccessAlertOpen(true);
         } catch (err) {
+            console.log(err);
             setSignTxnFailureAlertOpen(true);
             return;
         }

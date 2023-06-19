@@ -32,49 +32,6 @@ export default function Providers() {
                             {/* <div> {provider.isActive && "active"}</div> */}
                         </div>
                     </h4>
-                    <div className="">
-                        {/* <button
-                            onClick={provider.connect}
-                            disabled={provider.isConnected}
-                        >
-                            Connect
-                        </button> */}
-                        {/* <button
-                            onClick={provider.disconnect}
-                            disabled={!provider.isConnected}
-                        >
-                            Disconnect
-                        </button> */}
-                        {/* <button
-                            onClick={provider.setActiveProvider}
-                            disabled={
-                                !provider.isConnected || provider.isActive
-                            }
-                        >
-                            Set Active
-                        </button> */}
-                        {/* <div>
-                            {provider.isActive && provider.accounts.length && (
-                                <select
-                                    value={activeAccount?.address}
-                                    onChange={(e) =>
-                                        provider.setActiveAccount(
-                                            e.target.value
-                                        )
-                                    }
-                                >
-                                    {provider.accounts.map((account) => (
-                                        <option
-                                            key={account.address}
-                                            value={account.address}
-                                        >
-                                            {account.address}
-                                        </option>
-                                    ))}
-                                </select>
-                            )}
-                        </div> */}
-                    </div>
                 </div>
             ))}
         </div>

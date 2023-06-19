@@ -222,7 +222,6 @@ export default function AddTransaction({
         const atc = new algosdk.AtomicTransactionComposer();
         const optInTxn = await createOptInTxn(activeAddress, parseInt(appId));
         if (optInTxn) {
-            console.log("Adding Opt-in txn.");
             atc.addTransaction({ txn: optInTxn, signer });
         }
         atc.addMethodCall(storeTxnAppCall);
